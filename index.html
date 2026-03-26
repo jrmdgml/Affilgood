@@ -298,61 +298,88 @@
   .phase-tab.active .tab-label { color: var(--text); }
   .tab-arrow { color: var(--text2); font-size: 18px; padding: 0 8px; flex-shrink: 0; opacity: 0.5; }
 
-  /* Supplement cards */
-  .supps-list { display: flex; flex-direction: column; gap: 20px; }
+  /* Supplement cards — 2-column grid */
+  .phase-section { margin-bottom: 56px; scroll-margin-top: 100px; }
+  .phase-section-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
+    padding-bottom: 14px; border-bottom: 1px solid var(--border);
+  }
+  .phase-section-header h3 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+  .phase-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    box-shadow: 0 0 8px rgba(124,58,237,0.6);
+  }
+  .phase-count { font-size: 12px; color: var(--text2); margin-left: auto; }
+
+  .supps-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  @media (max-width: 640px) { .supps-grid { grid-template-columns: 1fr; } }
+
   .supp-card {
     background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 28px; transition: all 0.25s;
-    animation: fadeInUp 0.35s ease both;
+    padding: 20px; transition: all 0.25s;
+    animation: fadeInUp 0.35s ease both; display: flex; flex-direction: column;
   }
   .supp-card:hover { border-color: var(--border2); box-shadow: var(--shadow); }
   @keyframes fadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
 
-  .supp-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; }
-  .supp-name { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
-  .supp-emoji { font-size: 28px; }
-  .supp-goal-bar { margin-bottom: 18px; }
+  .supp-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; gap: 8px; }
+  .supp-name { font-size: 16px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.3; }
+  .supp-category {
+    font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 4px; flex-shrink: 0;
+    background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(37,99,235,0.2));
+    border: 1px solid rgba(124,58,237,0.35); color: #a78bfa;
+  }
+  .supp-goal-bar { margin-bottom: 14px; }
   .bar-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .bar-label-text { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
-  .bar-score { font-size: 13px; font-weight: 700; color: var(--text); }
-  .bar-track { height: 8px; background: var(--card2); border-radius: 99px; overflow: hidden; }
+  .bar-label-text { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .bar-score { font-size: 12px; font-weight: 700; color: var(--text); }
+  .bar-track { height: 7px; background: var(--card2); border-radius: 99px; overflow: hidden; }
   .bar-fill {
     height: 100%; border-radius: 99px;
     background: linear-gradient(90deg, var(--accent1), var(--accent2));
     width: 0%; transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
   }
-  .supp-why { font-size: 14px; color: var(--text2); line-height: 1.65; margin-bottom: 18px; }
-  .supp-dose {
-    display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px;
-    background: var(--card2); border-radius: 50px; border: 1px solid var(--border2);
-    font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 24px;
-  }
-  .supp-dose .timing-icon { color: var(--accent1); }
+  .supp-why { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 14px; }
+
+  /* Dose table */
+  .dose-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; background: var(--card2); border-radius: 8px; overflow: hidden; }
+  .dose-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .dose-table tr:last-child td { border-bottom: none; }
+  .dose-table .dt-label { color: var(--text2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; font-size: 10px; width: 42%; }
+  .dose-table .dt-val { color: var(--text); font-weight: 500; }
 
   /* Brand carousel */
-  .brand-carousel { border-top: 1px solid var(--border); padding-top: 20px; }
-  .carousel-label { font-size: 11px; font-weight: 700; color: var(--text2); letter-spacing: 1.5px; text-transform: uppercase; text-align: center; margin-bottom: 14px; }
-  .carousel-inner { display: flex; align-items: center; gap: 14px; }
+  .brand-carousel { border-top: 1px solid var(--border); padding-top: 16px; margin-top: auto; }
+  .carousel-label { font-size: 10px; font-weight: 700; color: var(--text2); letter-spacing: 1.5px; text-transform: uppercase; text-align: center; margin-bottom: 12px; }
+  .carousel-inner { display: flex; align-items: center; gap: 10px; }
   .carousel-btn {
-    width: 34px; height: 34px; border-radius: 50%; background: var(--card2); border: 1px solid var(--border2);
-    color: var(--text2); font-size: 16px; cursor: pointer; display: flex; align-items: center;
+    width: 32px; height: 32px; border-radius: 50%; background: var(--card2); border: 1px solid var(--border2);
+    color: var(--text2); font-size: 15px; cursor: pointer; display: flex; align-items: center;
     justify-content: center; flex-shrink: 0; transition: all 0.18s;
   }
   .carousel-btn:hover { border-color: var(--accent1); color: var(--text); }
-  .brand-display { flex: 1; display: flex; align-items: center; gap: 16px; min-width: 0; }
+  .carousel-btn-next {
+    border-color: rgba(124,58,237,0.5); color: var(--accent1);
+    animation: blink-arrow 1.3s ease-in-out infinite;
+  }
+  @keyframes blink-arrow {
+    0%,100%{opacity:1;transform:translateX(0);box-shadow:none}
+    50%{opacity:0.5;transform:translateX(3px);box-shadow:0 0 10px rgba(124,58,237,0.5)}
+  }
+  .brand-display { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; min-width: 0; transition: opacity 0.18s, transform 0.18s; }
+  .brand-name-top { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   .brand-img {
-    width: 64px; height: 64px; border-radius: 12px; flex-shrink: 0;
+    width: 100%; max-width: 130px; height: 110px; border-radius: 12px;
     background: linear-gradient(135deg, var(--accent1), var(--accent2));
     display: flex; align-items: center; justify-content: center;
-    font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 1px;
+    font-size: 16px; font-weight: 800; color: #fff; letter-spacing: 1px;
   }
-  .brand-info { min-width: 0; flex: 1; }
-  .brand-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .brand-tagline { font-size: 12px; color: var(--text2); margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand-tagline { font-size: 11px; color: var(--text2); max-width: 130px; line-height: 1.4; }
   .buy-btn {
-    display: inline-block; padding: 9px 18px; border-radius: 50px;
+    display: inline-block; padding: 8px 16px; border-radius: 50px;
     background: linear-gradient(135deg, var(--accent1), var(--accent2));
-    color: #fff; font-size: 12px; font-weight: 700; text-decoration: none;
+    color: #fff; font-size: 11px; font-weight: 700; text-decoration: none;
     letter-spacing: 0.5px; transition: all 0.18s; cursor: pointer; border: none;
   }
   .buy-btn:hover { opacity: 0.88; transform: translateY(-1px); }
@@ -396,8 +423,12 @@
       <span style="width:6px;height:6px;border-radius:50%;background:var(--accent1);display:inline-block;"></span>
       AI-Powered Supplement Recommendations
     </div>
+    <div style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(124,58,237,0.25),rgba(37,99,235,0.25));border:1.5px solid rgba(124,58,237,0.5);border-radius:50px;padding:8px 22px;margin-bottom:16px;">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span style="font-weight:700;font-size:15px;color:#a78bfa;letter-spacing:0.5px;">100% Free — No credit card, no subscription, ever.</span>
+    </div>
     <h1>Your body.<br><span class="gradient-text">Your supplements.</span></h1>
-    <p>Answer 5 quick questions and get a science-backed supplement plan tailored to your goals, training style, and budget.</p>
+    <p>Answer 5 quick questions and get a science-backed supplement plan tailored to your goals, training style, and budget — completely free, no strings attached.</p>
     <div class="hero-cta">
       <button class="btn btn-primary" onclick="startQuestionnaire()">
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
@@ -411,7 +442,7 @@
     <div class="stat"><div class="stat-num">50,000+</div><div class="stat-label">Plans Generated</div></div>
     <div class="stat"><div class="stat-num">93%</div><div class="stat-label">User Satisfaction</div></div>
     <div class="stat"><div class="stat-num">2 min</div><div class="stat-label">To Get Your Plan</div></div>
-    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Personalized</div></div>
+    <div class="stat"><div class="stat-num" style="background:linear-gradient(135deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">FREE</div><div class="stat-label">Always & Forever</div></div>
   </div>
 
   <!-- Program Cards -->
@@ -421,6 +452,7 @@
     <div class="programs-grid">
       <div class="program-card active-card" onclick="startQuestionnaire()">
         <div class="card-glow"></div>
+        <div style="position:absolute;top:16px;right:16px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;font-size:11px;font-weight:800;letter-spacing:1px;padding:4px 12px;border-radius:50px;text-transform:uppercase;">FREE</div>
         <div class="program-icon">💊</div>
         <h3>Supplement Program</h3>
         <p>Fuel your training from warm-up to recovery. Get a personalized pre, intra, and post-workout supplement stack — with exact doses, timing, and brand picks tailored to your goals.</p>
@@ -740,6 +772,14 @@
 
     <div class="profile-summary" id="profile-summary"></div>
 
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:32px;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent1),var(--accent2));"></div>
+      <div style="font-size:11px;font-weight:700;color:var(--accent1);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">About Your Plan</div>
+      <p style="font-size:14px;color:var(--text2);line-height:1.7;margin:0;" id="plan-intro-text">
+        Based on your goals, training profile, and budget, our algorithm selected the supplements that will have the highest impact on your performance — organized across your three training phases. Scroll through to discover what to take before, during, and after each session, with science-backed doses and timing tailored specifically to you.
+      </p>
+    </div>
+
     <div class="phase-tabs-wrap" id="phase-tabs">
       <div class="phase-tab active" data-phase="pre" onclick="switchPhase('pre')">
         <div class="tab-dot"></div>
@@ -757,7 +797,16 @@
       </div>
     </div>
 
-    <div class="supps-list" id="supps-list"></div>
+    <div id="supps-container"></div>
+
+    <!-- One-pager CTA -->
+    <div style="text-align:center;padding:48px 0 16px;">
+      <button class="btn btn-primary" style="font-size:16px;padding:16px 36px;" onclick="openOnePager()">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        View My Full Plan — One Page
+      </button>
+      <p style="font-size:13px;color:var(--text2);margin-top:12px;">Clean summary you can save or print</p>
+    </div>
   </div>
   <footer>
     <p style="margin-bottom:8px;">SupplAI &copy; 2026 — Personalized Supplement Recommendations</p>
@@ -765,6 +814,34 @@
   </footer>
 </section>
 
+<!-- ─── ONE-PAGER MODAL ─── -->
+<div id="one-pager-overlay" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);overflow-y:auto;">
+  <div id="one-pager-sheet" style="max-width:780px;margin:40px auto;background:#fff;border-radius:16px;overflow:hidden;color:#111;font-family:'Inter',sans-serif;">
+
+    <!-- Print controls (hidden when printing) -->
+    <div class="no-print" style="background:#f4f4f8;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ddd;">
+      <span style="font-size:13px;color:#555;">Your personalised supplement plan</span>
+      <div style="display:flex;gap:10px;">
+        <button onclick="window.print()" style="padding:8px 18px;border-radius:50px;background:#7c3aed;color:#fff;border:none;font-weight:700;font-size:13px;cursor:pointer;">Print / Save PDF</button>
+        <button onclick="closeOnePager()" style="padding:8px 18px;border-radius:50px;background:#eee;color:#333;border:none;font-weight:600;font-size:13px;cursor:pointer;">Close</button>
+      </div>
+    </div>
+
+    <!-- Sheet content -->
+    <div style="padding:36px 40px 48px;" id="one-pager-content"></div>
+  </div>
+</div>
+
+<style>
+  @media print {
+    body > *:not(#one-pager-overlay) { display: none !important; }
+    #one-pager-overlay { display: block !important; position: static !important; background: none !important; backdrop-filter: none !important; }
+    #one-pager-sheet { margin: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+    .no-print { display: none !important; }
+  }
+</style>
+
+<script src="database.js"></script>
 <script>
 // ──────────────────────────────────────────────
 //  STATE
@@ -953,179 +1030,9 @@ function selectBudget(el) {
 }
 
 // ──────────────────────────────────────────────
-//  BRAND DATABASE
+//  DATABASE (BRANDS, CATEGORIES, scores, doses,
+//  why-text) lives in database.js
 // ──────────────────────────────────────────────
-const BRANDS = {
-  'Whey Protein': [
-    { name: 'Optimum Nutrition', tagline: 'Gold Standard quality since 1986', abbr: 'ON' },
-    { name: 'Myprotein', tagline: 'Europe\'s #1 sports nutrition brand', abbr: 'MP' },
-    { name: 'Dymatize', tagline: 'Precision nutrition for elite athletes', abbr: 'DY' },
-    { name: 'BSN', tagline: 'Finish First — always', abbr: 'BSN' }
-  ],
-  'Plant Protein': [
-    { name: 'Garden of Life', tagline: 'Certified organic, whole-food protein', abbr: 'GOL' },
-    { name: 'Vega', tagline: 'Plant-based fuel for every body', abbr: 'VEG' },
-    { name: 'Myprotein', tagline: 'Europe\'s #1 sports nutrition brand', abbr: 'MP' },
-    { name: 'Bulk', tagline: 'No nonsense. Just gains.', abbr: 'BLK' }
-  ],
-  'Creatine': [
-    { name: 'Optimum Nutrition', tagline: 'The gold standard in creatine monohydrate', abbr: 'ON' },
-    { name: 'Myprotein', tagline: 'Pure creatine, unbeatable value', abbr: 'MP' },
-    { name: 'Bulk', tagline: 'Lab-tested, no fluff, full dose', abbr: 'BLK' },
-    { name: 'Nutricost', tagline: 'Effective. Simple. Affordable.', abbr: 'NTC' }
-  ],
-  'Caffeine': [
-    { name: 'Bulk', tagline: 'Clean caffeine, pharmaceutical grade', abbr: 'BLK' },
-    { name: 'Nutricost', tagline: 'No frills, full focus', abbr: 'NTC' },
-    { name: 'NOW Foods', tagline: 'Trusted natural supplements since 1968', abbr: 'NOW' },
-    { name: 'GNC', tagline: 'Live well with GNC', abbr: 'GNC' }
-  ],
-  'Beta-Alanine': [
-    { name: 'NOW Foods', tagline: 'Sports tested CarnoSyn beta-alanine', abbr: 'NOW' },
-    { name: 'Bulk', tagline: 'Pure CarnoSyn, full clinical dose', abbr: 'BLK' },
-    { name: 'Nutricost', tagline: 'Science-backed endurance support', abbr: 'NTC' },
-    { name: 'Cellucor', tagline: 'Feel the tingle. Feel the gains.', abbr: 'CEL' }
-  ],
-  'BCAAs': [
-    { name: 'Myprotein', tagline: 'Instantized 2:1:1 BCAA ratio', abbr: 'MP' },
-    { name: 'Optimum Nutrition', tagline: 'Gold Standard amino acids', abbr: 'ON' },
-    { name: 'Scivation', tagline: 'Xtend — the world\'s #1 BCAA brand', abbr: 'SCI' },
-    { name: 'BSN', tagline: 'Amino X — advanced amino formula', abbr: 'BSN' }
-  ],
-  'Electrolytes': [
-    { name: 'Liquid I.V.', tagline: 'Hydration multiplier technology', abbr: 'LIV' },
-    { name: 'LMNT', tagline: 'No sugar. Just sodium, potassium, magnesium.', abbr: 'LMT' },
-    { name: 'Nuun', tagline: 'Clean hydration for every athlete', abbr: 'NUN' },
-    { name: 'GNC', tagline: 'Performance hydration you can trust', abbr: 'GNC' }
-  ],
-  'Omega-3': [
-    { name: 'Nordic Naturals', tagline: 'The world\'s #1 omega-3 brand', abbr: 'NN' },
-    { name: 'NOW Foods', tagline: 'Ultra-concentrated EPA+DHA', abbr: 'NOW' },
-    { name: 'Thorne', tagline: 'Pharmaceutical-grade fish oil', abbr: 'THR' },
-    { name: 'Garden of Life', tagline: 'Certified sustainable, molecularly distilled', abbr: 'GOL' }
-  ],
-  'Magnesium': [
-    { name: 'Thorne', tagline: 'Bisglycinate form for maximum absorption', abbr: 'THR' },
-    { name: 'NOW Foods', tagline: 'Full-spectrum magnesium support', abbr: 'NOW' },
-    { name: 'Life Extension', tagline: 'Clinically studied magnesium L-threonate', abbr: 'LE' },
-    { name: 'Garden of Life', tagline: 'Whole-food organic magnesium blend', abbr: 'GOL' }
-  ],
-  'L-Citrulline': [
-    { name: 'Transparent Labs', tagline: 'Clinical doses. Zero proprietary blends.', abbr: 'TL' },
-    { name: 'Bulk', tagline: 'Fermented, ultra-pure L-Citrulline', abbr: 'BLK' },
-    { name: 'NOW Foods', tagline: 'Pharmaceutical grade amino acid', abbr: 'NOW' },
-    { name: 'Nutricost', tagline: 'Pure citrulline at an honest price', abbr: 'NTC' }
-  ],
-  'Ashwagandha': [
-    { name: 'KSM-66', tagline: 'The most clinically studied ashwagandha extract', abbr: 'KSM' },
-    { name: 'NOW Foods', tagline: 'Full-spectrum Sensoril ashwagandha', abbr: 'NOW' },
-    { name: 'Thorne', tagline: 'Pharma-grade adaptogen for stress and strength', abbr: 'THR' },
-    { name: 'Garden of Life', tagline: 'Organic certified whole root powder', abbr: 'GOL' }
-  ],
-  'ZMA': [
-    { name: 'NOW Foods', tagline: 'Original ZMA zinc, magnesium & B6 formula', abbr: 'NOW' },
-    { name: 'Optimum Nutrition', tagline: 'Recovery and hormone support blend', abbr: 'ON' },
-    { name: 'Bulk', tagline: 'High-strength ZMA at great value', abbr: 'BLK' },
-    { name: 'GNC', tagline: 'Proven sleep and testosterone formula', abbr: 'GNC' }
-  ],
-  'Carbohydrates (Fast)': [
-    { name: 'Maurten', tagline: 'The fuel of world champions', abbr: 'MAU' },
-    { name: 'SIS', tagline: 'Science in Sport — lab-tested carbs', abbr: 'SIS' },
-    { name: 'GU Energy', tagline: 'Engineered for performance since 1993', abbr: 'GU' },
-    { name: 'Myprotein', tagline: 'Pure waxy maize starch for endurance', abbr: 'MP' }
-  ]
-};
-
-// ──────────────────────────────────────────────
-//  SUPPLEMENT LOGIC
-// ──────────────────────────────────────────────
-function computeScore(supp, goals, data) {
-  const g = goals;
-  const s = {
-    'Caffeine': g.includes('Peak Performance') || g.includes('Endurance') ? 95 : g.includes('Build Muscle') ? 85 : 75,
-    'Creatine': g.includes('Build Muscle') ? 98 : g.includes('Peak Performance') ? 90 : g.includes('Body Recomposition') ? 88 : 80,
-    'Beta-Alanine': g.includes('Endurance') ? 92 : data.trainingStyle.includes('HIIT') ? 90 : g.includes('Build Muscle') ? 80 : 75,
-    'L-Citrulline': g.includes('Peak Performance') ? 92 : g.includes('Build Muscle') ? 88 : g.includes('Endurance') ? 85 : 78,
-    'Ashwagandha': g.includes('General Health') ? 85 : g.includes('Lose Weight') ? 78 : 72,
-    'BCAAs': g.includes('Endurance') ? 88 : g.includes('Build Muscle') ? 82 : 78,
-    'Electrolytes': g.includes('Cycling') ? 92 : g.includes('Endurance') ? 90 : data.trainingStyle.includes('HIIT') ? 88 : 78,
-    'Carbohydrates (Fast)': g.includes('Endurance') ? 95 : g.includes('Cycling') ? 92 : 78,
-    'Whey Protein': g.includes('Build Muscle') ? 98 : g.includes('Body Recomposition') ? 92 : g.includes('Lose Weight') ? 85 : 80,
-    'Plant Protein': g.includes('Build Muscle') ? 98 : g.includes('Body Recomposition') ? 92 : g.includes('Lose Weight') ? 85 : 80,
-    'Omega-3': g.includes('General Health') ? 88 : g.includes('Lose Weight') ? 82 : 75,
-    'Magnesium': g.includes('General Health') ? 85 : ['Evening','Night'].includes(data.trainingTime) ? 90 : 78,
-    'ZMA': g.includes('Build Muscle') ? 82 : g.includes('Peak Performance') ? 80 : 75
-  };
-  return s[supp] || 75;
-}
-
-function getWhyText(supp, goals, data) {
-  const g = goals.join(', ');
-  const texts = {
-    'Caffeine': `Caffeine directly enhances focus, reaction time, and power output — key factors for your ${goals[0]} goal. By blocking adenosine receptors it reduces perceived effort, letting you push harder and longer in every session.`,
-    'Creatine': goals.includes('Build Muscle')
-      ? `Creatine saturates your muscle cells with phosphocreatine, directly boosting your strength output and enabling the progressive overload needed to build muscle mass.`
-      : `Creatine replenishes ATP stores rapidly, translating to more reps, more power, and better performance — precisely what your ${goals[0]} goal demands.`,
-    'Beta-Alanine': goals.includes('Endurance')
-      ? `Beta-alanine buffers lactic acid buildup in muscle tissue, extending your time to fatigue — the critical limiting factor in endurance training.`
-      : `Beta-alanine increases muscle carnosine levels, delaying the burn during high-intensity intervals and helping you sustain peak output across more sets.`,
-    'L-Citrulline': goals.includes('Build Muscle')
-      ? `L-Citrulline drives nitric oxide production for exceptional muscle pumps and increased blood flow to working muscles, directly enhancing nutrient delivery for muscle growth.`
-      : `L-Citrulline amplifies nitric oxide synthesis, reducing fatigue and improving aerobic efficiency — critical for your ${goals[0]} goal.`,
-    'Ashwagandha': goals.includes('General Health')
-      ? `Ashwagandha (KSM-66) reduces cortisol by up to 28%, improves sleep quality, and supports healthy testosterone levels — foundational pillars of overall health and recovery.`
-      : `Ashwagandha blunts cortisol spikes after ${data.trainingTime?.toLowerCase() || 'evening'} training, promoting deeper sleep and faster recovery while supporting body composition goals.`,
-    'BCAAs': goals.includes('Build Muscle')
-      ? `BCAAs (especially leucine) directly trigger muscle protein synthesis. Taking them during long sessions prevents muscle catabolism and primes your body for growth.`
-      : `BCAAs reduce exercise-induced muscle damage and mental fatigue during sessions exceeding 60 minutes, helping you maintain form and intensity throughout.`,
-    'Electrolytes': data.trainingStyle.includes('HIIT') || goals.includes('Endurance')
-      ? `High-intensity and endurance training causes significant electrolyte losses through sweat. Replenishing sodium, potassium, and magnesium during exercise maintains power output and prevents cramping.`
-      : `Even moderate sweat losses impair performance by 2-3%. Electrolytes maintain fluid balance and nerve conduction, keeping you sharp and powerful throughout your session.`,
-    'Carbohydrates (Fast)': goals.includes('Endurance')
-      ? `Fast-acting carbohydrates are the primary fuel for endurance work. Consuming 30-60g per hour prevents glycogen depletion — the primary cause of hitting the wall in endurance events.`
-      : `During long sessions, fast carbs maintain blood glucose and muscle glycogen, preserving performance quality and preventing premature fatigue.`,
-    'Whey Protein': goals.includes('Build Muscle')
-      ? `Whey protein delivers a rapid spike of leucine — the master trigger for muscle protein synthesis. Its fast absorption makes it ideal post-workout when your muscles are primed for growth.`
-      : goals.includes('Lose Weight')
-      ? `Whey protein is the most satiety-inducing macronutrient per calorie. Post-workout consumption preserves lean muscle during a deficit, ensuring you lose fat, not muscle.`
-      : `Whey protein provides all essential amino acids in optimal ratios, accelerating muscle repair after training and supporting your body composition goals.`,
-    'Plant Protein': `Plant protein delivers a complete amino acid profile from whole-food sources, supporting muscle repair and recovery without animal products — perfectly aligned with your dietary choices and ${goals[0]} goal.`,
-    'Omega-3': goals.includes('General Health')
-      ? `Omega-3 EPA+DHA are the most well-researched supplements for cardiovascular health, inflammation reduction, and cognitive function — three pillars of long-term wellbeing.`
-      : `Omega-3 reduces exercise-induced inflammation and muscle soreness, accelerating recovery between sessions and supporting your ${goals[0]} journey.`,
-    'Magnesium': ['Evening','Night'].includes(data.trainingTime)
-      ? `Evening training elevates cortisol at a time when it should be declining. Magnesium glycinate rebalances this, improving sleep quality, reducing overnight muscle tension, and enhancing recovery.`
-      : `Magnesium is depleted by intense training and is a cofactor in over 300 enzymatic reactions including ATP production, protein synthesis, and muscle relaxation — critical for ${goals[0]}.`,
-    'ZMA': `ZMA's synergistic combination of zinc, magnesium, and B6 supports testosterone and IGF-1 levels during sleep — the optimal hormonal window for muscle repair and growth during your ${goals[0]} phase.`
-  };
-  return texts[supp] || `${supp} is a well-researched supplement that directly supports your ${g} goals through its evidence-based mechanisms.`;
-}
-
-function getDoseText(supp, data) {
-  const weight = data.weightKg || 75;
-  const doses = {
-    'Caffeine': `${weight < 70 ? '150mg' : '200mg'} · 30-45 min before workout`,
-    'Creatine': '5g · Any time, consistency matters most',
-    'Beta-Alanine': '3.2g · 30 min before workout (tingling is normal)',
-    'L-Citrulline': '6-8g · 30-45 min before workout',
-    'Ashwagandha': '600mg · With meal, 1-2 hours before sleep',
-    'BCAAs': '10g · Sip throughout your workout',
-    'Electrolytes': '1 serving · Mix in water, drink during workout',
-    'Carbohydrates (Fast)': '30-60g per hour · Consume during activity',
-    'Whey Protein': '25-30g · Within 30 min post-workout',
-    'Plant Protein': '25-30g · Within 30 min post-workout',
-    'Omega-3': '1-2g EPA+DHA · With a fatty meal',
-    'Magnesium': '300-400mg · 30-60 min before bed',
-    'ZMA': '1 serving · On empty stomach, 30-60 min before bed'
-  };
-  return doses[supp] || '1 serving · As directed';
-}
-
-const EMOJIS = {
-  'Caffeine': '💊', 'Creatine': '💪', 'Beta-Alanine': '⚡', 'L-Citrulline': '🔥',
-  'Ashwagandha': '🌿', 'BCAAs': '🥤', 'Electrolytes': '💧', 'Carbohydrates (Fast)': '⚡',
-  'Whey Protein': '🥛', 'Plant Protein': '🌱', 'Omega-3': '🐟', 'Magnesium': '🧲', 'ZMA': '🌙'
-};
 
 function buildPlan(data) {
   const { goals, diet, trainingStyle, trainingTime, duration, sessionsPerWeek, experience, budget, weightKg } = data;
@@ -1266,8 +1173,9 @@ function runLoadingAnimation() {
 // ──────────────────────────────────────────────
 //  RENDER RESULTS
 // ──────────────────────────────────────────────
+const PHASE_LABELS = { pre: 'Pre-Workout', during: 'During Workout', post: 'Post-Workout' };
+
 function renderResults() {
-  // Profile chips
   const chips = [
     ...state.goals,
     state.sessionsPerWeek ? `${state.sessionsPerWeek} sessions/week` : null,
@@ -1280,71 +1188,64 @@ function renderResults() {
   document.getElementById('profile-summary').innerHTML = chips.map(c => `<span class="profile-chip">${c}</span>`).join('');
   document.getElementById('results-subtitle').textContent = `Personalized for ${state.email}`;
 
-  switchPhase('pre');
-}
+  // Render all three phases at once
+  const container = document.getElementById('supps-container');
+  container.innerHTML = ['pre', 'during', 'post'].map(phase => {
+    const supps = state.plan[phase] || [];
+    const cardsHtml = supps.length > 0
+      ? supps.map((s, idx) => buildSuppCard(s, idx, phase)).join('')
+      : `<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text2);background:var(--card);border-radius:var(--radius);border:1px solid var(--border);">
+           <div style="font-size:14px;font-weight:600;">No supplements for this phase</div>
+           <div style="font-size:13px;margin-top:6px;">Focus your budget on the other phases.</div>
+         </div>`;
+    return `
+      <div class="phase-section" id="phase-section-${phase}">
+        <div class="phase-section-header">
+          <div class="phase-dot"></div>
+          <h3>${PHASE_LABELS[phase]}</h3>
+          ${supps.length > 0 ? `<span class="phase-count">${supps.length} supplement${supps.length > 1 ? 's' : ''}</span>` : ''}
+        </div>
+        <div class="supps-grid">${cardsHtml}</div>
+      </div>`;
+  }).join('');
 
-function switchPhase(phase) {
-  state.activePhase = phase;
-  document.querySelectorAll('.phase-tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.phase === phase);
+  // Init all carousels
+  ['pre', 'during', 'post'].forEach(phase => {
+    (state.plan[phase] || []).forEach((_, idx) => {
+      window[`carousel_${phase}_${idx}`] = 0;
+    });
   });
-  renderSupplements(phase);
-}
 
-function renderSupplements(phase) {
-  const list = document.getElementById('supps-list');
-  const supps = state.plan[phase] || [];
-  const alreadyAnimated = state.animatedPhases.has(phase);
-
-  if (supps.length === 0) {
-    list.innerHTML = `<div style="text-align:center;padding:48px;color:var(--text2);">
-      <div style="font-size:40px;margin-bottom:16px;">✓</div>
-      <div style="font-size:16px;font-weight:600;">No supplements needed for this phase</div>
-      <div style="font-size:14px;margin-top:8px;">Based on your profile, focus your budget on the other phases.</div>
-    </div>`;
-    return;
-  }
-
-  list.innerHTML = supps.map((s, idx) => buildSuppCard(s, idx)).join('');
-
-  // Animate bars after short delay
-  if (!alreadyAnimated) {
-    state.animatedPhases.add(phase);
-    setTimeout(() => {
-      supps.forEach((s, idx) => {
+  // Animate all bars after a short delay
+  setTimeout(() => {
+    ['pre', 'during', 'post'].forEach(phase => {
+      (state.plan[phase] || []).forEach((s, idx) => {
         const bar = document.getElementById(`bar-${phase}-${idx}`);
         if (bar) bar.style.width = s.score + '%';
       });
-    }, 100);
-  } else {
-    // Set immediately without animation
-    supps.forEach((s, idx) => {
-      const bar = document.getElementById(`bar-${phase}-${idx}`);
-      if (bar) {
-        bar.style.transition = 'none';
-        bar.style.width = s.score + '%';
-      }
     });
-  }
-
-  // Init carousels
-  supps.forEach((s, idx) => {
-    window[`carousel_${phase}_${idx}`] = 0;
-  });
+  }, 300);
 }
 
-function buildSuppCard(s, idx) {
-  const phase = state.activePhase;
+function switchPhase(phase) {
+  document.querySelectorAll('.phase-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.phase === phase);
+  });
+  const section = document.getElementById(`phase-section-${phase}`);
+  if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function buildSuppCard(s, idx, phase) {
   const brands = BRANDS[s.name] || [{ name: 'Various Brands', tagline: 'Quality supplement', abbr: 'SUP' }];
-  const emoji = EMOJIS[s.name] || '💊';
+  const category = CATEGORIES[s.name] || 'SUPPLEMENT';
   const why = getWhyText(s.name, state.goals, state);
-  const dose = getDoseText(s.name, state);
+  const doseData = getDoseData(s.name, state);
 
   return `
   <div class="supp-card" style="animation-delay:${idx * 0.08}s">
     <div class="supp-header">
       <div class="supp-name">${s.name}</div>
-      <div class="supp-emoji">${emoji}</div>
+      <div class="supp-category">${category}</div>
     </div>
 
     <div class="supp-goal-bar">
@@ -1359,19 +1260,20 @@ function buildSuppCard(s, idx) {
 
     <div class="supp-why">${why}</div>
 
-    <div class="supp-dose">
-      <span class="timing-icon">⏱</span>
-      ${dose}
-    </div>
+    <table class="dose-table">
+      <tr><td class="dt-label">Dose per session</td><td class="dt-val">${doseData.dose}</td></tr>
+      <tr><td class="dt-label">When</td><td class="dt-val">${doseData.when}</td></tr>
+      <tr><td class="dt-label">Frequency</td><td class="dt-val">${doseData.frequency}</td></tr>
+    </table>
 
     <div class="brand-carousel">
-      <div class="carousel-label">— EXPLORE OUR CHOICE —</div>
+      <div class="carousel-label">— MAKE YOUR CHOICE —</div>
       <div class="carousel-inner">
         <button class="carousel-btn" onclick="carouselPrev('${phase}',${idx},${brands.length})">&#8592;</button>
         <div class="brand-display" id="brand-display-${phase}-${idx}">
           ${renderBrandSlide(brands[0])}
         </div>
-        <button class="carousel-btn" onclick="carouselNext('${phase}',${idx},${brands.length})">&#8594;</button>
+        <button class="carousel-btn carousel-btn-next" onclick="carouselNext('${phase}',${idx},${brands.length})">&#8594;</button>
       </div>
     </div>
   </div>`;
@@ -1379,12 +1281,10 @@ function buildSuppCard(s, idx) {
 
 function renderBrandSlide(brand) {
   return `
+    <div class="brand-name-top">${brand.name}</div>
     <div class="brand-img">${brand.abbr}</div>
-    <div class="brand-info">
-      <div class="brand-name">${brand.name}</div>
-      <div class="brand-tagline">${brand.tagline}</div>
-      <a href="#" class="buy-btn" onclick="return false;">BUY THIS PRODUCT</a>
-    </div>`;
+    <div class="brand-tagline">${brand.tagline}</div>
+    <a href="#" class="buy-btn" onclick="return false;">BUY THIS PRODUCT</a>`;
 }
 
 function carouselNext(phase, idx, total) {
@@ -1417,6 +1317,99 @@ function updateCarousel(phase, idx) {
     }, 180);
   }
 }
+
+// ──────────────────────────────────────────────
+//  ONE-PAGER
+// ──────────────────────────────────────────────
+function openOnePager() {
+  const phaseLabels = { pre: 'Pre-Workout', during: 'During Workout', post: 'Post-Workout' };
+  const phaseColors = { pre: '#7c3aed', during: '#2563eb', post: '#059669' };
+
+  const profileLine = [
+    ...state.goals,
+    state.sessionsPerWeek ? `${state.sessionsPerWeek} sessions/week` : null,
+    state.duration || null,
+    ...(state.trainingStyle.length ? state.trainingStyle : []),
+    state.trainingTime ? `${state.trainingTime} training` : null,
+    state.budget ? `Budget: ${state.budget}` : null
+  ].filter(Boolean).join('  ·  ');
+
+  const phaseSections = ['pre', 'during', 'post'].map(phase => {
+    const supps = state.plan[phase] || [];
+    if (!supps.length) return '';
+
+    const rows = supps.map(s => {
+      const d = getDoseData(s.name, state);
+      const cat = CATEGORIES[s.name] || 'SUPPLEMENT';
+      return `
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:10px 12px;font-weight:700;font-size:14px;">${s.name}</td>
+          <td style="padding:10px 12px;">
+            <span style="font-size:10px;font-weight:800;letter-spacing:1px;background:${phaseColors[phase]}18;color:${phaseColors[phase]};padding:2px 8px;border-radius:4px;">${cat}</span>
+          </td>
+          <td style="padding:10px 12px;font-size:13px;color:#333;">${d.dose}</td>
+          <td style="padding:10px 12px;font-size:13px;color:#555;">${d.when}</td>
+          <td style="padding:10px 12px;font-size:13px;color:#777;">${d.frequency}</td>
+          <td style="padding:10px 12px;text-align:center;font-weight:700;font-size:13px;color:${phaseColors[phase]};">${s.score}/100</td>
+        </tr>`;
+    }).join('');
+
+    return `
+      <div style="margin-bottom:32px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <div style="width:10px;height:10px;border-radius:50%;background:${phaseColors[phase]};flex-shrink:0;"></div>
+          <h3 style="font-size:16px;font-weight:700;color:#111;margin:0;">${phaseLabels[phase]}</h3>
+          <span style="font-size:12px;color:#888;margin-left:auto;">${supps.length} supplement${supps.length > 1 ? 's' : ''}</span>
+        </div>
+        <table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:10px;overflow:hidden;font-family:'Inter',sans-serif;">
+          <thead>
+            <tr style="background:${phaseColors[phase]}10;">
+              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;">Supplement</th>
+              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;">Category</th>
+              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;">Dose</th>
+              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;">When</th>
+              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;">Frequency</th>
+              <th style="padding:9px 12px;text-align:center;font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;">Impact</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }).join('');
+
+  const totalSupps = ['pre','during','post'].reduce((n, p) => n + (state.plan[p]||[]).length, 0);
+
+  document.getElementById('one-pager-content').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;flex-wrap:wrap;gap:16px;">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:#7c3aed;text-transform:uppercase;margin-bottom:6px;">SupplAI — Personalised Supplement Plan</div>
+        <h1 style="font-size:26px;font-weight:900;margin:0 0 8px;letter-spacing:-0.5px;color:#111;">Your Training Stack</h1>
+        <p style="font-size:13px;color:#666;margin:0;">${profileLine}</p>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:28px;font-weight:900;color:#7c3aed;">${totalSupps}</div>
+        <div style="font-size:12px;color:#888;">supplements selected</div>
+      </div>
+    </div>
+    <hr style="border:none;border-top:1px solid #eee;margin-bottom:28px;">
+    ${phaseSections}
+    <div style="margin-top:32px;padding:16px;background:#f9f9fb;border-radius:8px;font-size:12px;color:#888;line-height:1.6;">
+      <strong style="color:#555;">Disclaimer:</strong> This plan is generated for informational purposes only. Always consult a healthcare professional before starting any supplement regimen. Doses may vary based on individual needs and tolerance.
+    </div>`;
+
+  document.getElementById('one-pager-overlay').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeOnePager() {
+  document.getElementById('one-pager-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// Close on backdrop click
+document.getElementById('one-pager-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeOnePager();
+});
 
 // Initialize height unit display
 document.addEventListener('DOMContentLoaded', () => {
