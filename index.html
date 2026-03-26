@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SupplAI — Your Personalized Supplement Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --card: #111118;
+    --card2: #16161f;
+    --border: #1e1e2e;
+    --border2: #2a2a3a;
+    --accent1: #7c3aed;
+    --accent2: #2563eb;
+    --accent-mid: #4f46e5;
+    --text: #f0f0f8;
+    --text2: #9090a8;
+    --text3: #6060788;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --radius: 16px;
+    --radius-sm: 8px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 48px rgba(0,0,0,0.6);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── UTILITIES ─── */
+  .hidden { display: none !important; }
+  .gradient-text {
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px 24px; border-radius: 50px; font-weight: 600; font-size: 15px;
+    border: none; cursor: pointer; transition: all 0.2s; text-decoration: none;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    color: #fff;
+  }
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(124,58,237,0.4); }
+  .btn-ghost {
+    background: transparent; color: var(--text2); border: 1px solid var(--border2);
+  }
+  .btn-ghost:hover { border-color: var(--accent1); color: var(--text); }
+  .chip {
+    display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 50px;
+    font-size: 13px; font-weight: 500; border: 1.5px solid var(--border2);
+    background: var(--card2); color: var(--text2); cursor: pointer; transition: all 0.18s;
+    user-select: none;
+  }
+  .chip:hover { border-color: var(--accent1); color: var(--text); }
+  .chip.selected {
+    border-color: var(--accent1); background: rgba(124,58,237,0.18); color: var(--text);
+  }
+  .toggle-btn {
+    flex: 1; padding: 10px 16px; border-radius: 50px; border: 1.5px solid var(--border2);
+    background: var(--card2); color: var(--text2); font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all 0.18s; text-align: center; user-select: none;
+  }
+  .toggle-btn:hover { border-color: var(--accent1); color: var(--text); }
+  .toggle-btn.selected {
+    border-color: var(--accent1); background: rgba(124,58,237,0.2); color: var(--text);
+  }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 18px 40px; display: flex; align-items: center; justify-content: space-between;
+    background: rgba(10,10,15,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  nav .nav-links { display: flex; gap: 12px; align-items: center; }
+  nav .nav-link { color: var(--text2); font-size: 14px; font-weight: 500; text-decoration: none; padding: 8px 14px; border-radius: 8px; transition: all 0.18s; }
+  nav .nav-link:hover { color: var(--text); background: var(--card2); }
+
+  /* ─── LANDING ─── */
+  #landing { padding-top: 90px; }
+
+  .hero {
+    text-align: center; padding: 80px 24px 60px;
+    max-width: 800px; margin: 0 auto;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 16px; border-radius: 50px; border: 1px solid rgba(124,58,237,0.4);
+    background: rgba(124,58,237,0.1); color: var(--accent1); font-size: 13px; font-weight: 600;
+    margin-bottom: 28px; letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .hero h1 {
+    font-size: clamp(36px, 6vw, 72px); font-weight: 900; line-height: 1.08;
+    letter-spacing: -2px; margin-bottom: 20px;
+  }
+  .hero p {
+    font-size: clamp(16px, 2.5vw, 20px); color: var(--text2); line-height: 1.6;
+    max-width: 560px; margin: 0 auto 36px;
+  }
+  .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+  .stats-row {
+    display: flex; justify-content: center; gap: 48px; padding: 40px 24px;
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    max-width: 900px; margin: 0 auto; flex-wrap: wrap;
+  }
+  .stat { text-align: center; }
+  .stat-num { font-size: 32px; font-weight: 800; background: linear-gradient(135deg, var(--accent1), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .stat-label { font-size: 13px; color: var(--text2); margin-top: 4px; }
+
+  /* ─── PROGRAM CARDS ─── */
+  .programs-section { padding: 80px 24px; max-width: 1100px; margin: 0 auto; }
+  .programs-section h2 { text-align: center; font-size: clamp(24px, 4vw, 40px); font-weight: 800; letter-spacing: -1px; margin-bottom: 12px; }
+  .programs-section .sub { text-align: center; color: var(--text2); font-size: 16px; margin-bottom: 52px; }
+
+  .programs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  @media (max-width: 768px) { .programs-grid { grid-template-columns: 1fr; } }
+
+  .program-card {
+    background: var(--card); border-radius: var(--radius); padding: 36px 28px;
+    border: 1px solid var(--border); position: relative; overflow: hidden;
+    transition: all 0.25s;
+  }
+  .program-card.active-card {
+    border-color: transparent;
+    background: linear-gradient(var(--card), var(--card)) padding-box,
+                linear-gradient(135deg, var(--accent1), var(--accent2)) border-box;
+    border: 2px solid transparent;
+    cursor: pointer;
+  }
+  .program-card.active-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(124,58,237,0.3); }
+  .program-card.locked { opacity: 0.5; cursor: not-allowed; }
+  .program-card .card-glow {
+    position: absolute; top: -60px; right: -60px; width: 160px; height: 160px;
+    border-radius: 50%; background: radial-gradient(circle, rgba(124,58,237,0.2), transparent 70%);
+    pointer-events: none;
+  }
+  .program-icon {
+    width: 52px; height: 52px; border-radius: 14px; margin-bottom: 20px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    display: flex; align-items: center; justify-content: center; font-size: 22px;
+  }
+  .program-card.locked .program-icon { background: var(--card2); }
+  .program-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+  .program-card p { font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 24px; }
+  .coming-soon-badge {
+    display: inline-block; padding: 4px 12px; border-radius: 50px;
+    background: var(--card2); color: var(--text2); font-size: 12px; font-weight: 600;
+    border: 1px solid var(--border2);
+  }
+  .lock-icon { font-size: 18px; margin-right: 6px; }
+
+  /* ─── HOW IT WORKS ─── */
+  .how-section { padding: 80px 24px; max-width: 1000px; margin: 0 auto; }
+  .how-section h2 { text-align: center; font-size: clamp(24px, 4vw, 38px); font-weight: 800; letter-spacing: -1px; margin-bottom: 12px; }
+  .how-section .sub { text-align: center; color: var(--text2); font-size: 16px; margin-bottom: 52px; }
+  .steps-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  @media (max-width: 700px) { .steps-row { grid-template-columns: repeat(2, 1fr); } }
+  .step-item { text-align: center; padding: 28px 20px; background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); }
+  .step-num { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--accent1), var(--accent2)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; margin: 0 auto 14px; }
+  .step-item h4 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .step-item p { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+  /* ─── QUESTIONNAIRE ─── */
+  #questionnaire { padding-top: 90px; min-height: 100vh; display: none; }
+  #questionnaire.active { display: block; }
+  .q-header { padding: 32px 24px 0; max-width: 680px; margin: 0 auto; }
+  .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--text2); font-size: 14px; text-decoration: none; margin-bottom: 24px; cursor: pointer; transition: color 0.18s; }
+  .back-link:hover { color: var(--text); }
+
+  .progress-bar-wrap { margin-bottom: 28px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--text2); margin-bottom: 8px; }
+  .progress-track { height: 6px; background: var(--card2); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent1), var(--accent2)); transition: width 0.4s ease; }
+
+  .q-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 40px; max-width: 680px; margin: 0 auto; }
+  .q-step-label { font-size: 12px; font-weight: 600; color: var(--accent1); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .q-card h2 { font-size: clamp(20px, 4vw, 28px); font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+  .q-card .hint { font-size: 14px; color: var(--text2); margin-bottom: 28px; }
+  .q-footer { display: flex; gap: 12px; justify-content: space-between; align-items: center; margin-top: 36px; }
+  .q-footer .spacer { flex: 1; }
+
+  /* Goal pills */
+  .pills-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+
+  /* Profile fields */
+  .field-group { margin-bottom: 24px; }
+  .field-label { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .input-row { display: flex; gap: 10px; align-items: center; }
+  .text-input {
+    flex: 1; background: var(--card2); border: 1.5px solid var(--border2);
+    color: var(--text); font-size: 15px; font-family: 'Inter', sans-serif;
+    padding: 12px 16px; border-radius: var(--radius-sm); outline: none; transition: border-color 0.18s;
+  }
+  .text-input:focus { border-color: var(--accent1); }
+  .toggle-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .unit-toggle { display: flex; background: var(--card2); border-radius: 50px; border: 1px solid var(--border2); overflow: hidden; }
+  .unit-btn { padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: transparent; color: var(--text2); transition: all 0.18s; }
+  .unit-btn.active { background: linear-gradient(135deg, var(--accent1), var(--accent2)); color: #fff; border-radius: 50px; }
+
+  /* Budget cards */
+  .budget-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (max-width: 400px) { .budget-grid { grid-template-columns: 1fr; } }
+  .budget-card {
+    padding: 20px; border-radius: var(--radius-sm); border: 1.5px solid var(--border2);
+    background: var(--card2); cursor: pointer; transition: all 0.18s; text-align: center;
+  }
+  .budget-card:hover { border-color: var(--accent1); }
+  .budget-card.selected { border-color: var(--accent1); background: rgba(124,58,237,0.15); }
+  .budget-card .budget-amount { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .budget-card .budget-label { font-size: 12px; color: var(--text2); }
+
+  /* Email step */
+  .email-note { font-size: 13px; color: var(--text2); display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px; background: var(--card2); border-radius: var(--radius-sm); margin-bottom: 20px; }
+  .consent-row { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; }
+  .consent-row input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent1); margin-top: 2px; flex-shrink: 0; cursor: pointer; }
+  .consent-row span { font-size: 14px; color: var(--text2); line-height: 1.5; }
+
+  /* ─── LOADING ─── */
+  #loading { padding-top: 90px; min-height: 100vh; display: none; align-items: center; justify-content: center; flex-direction: column; }
+  #loading.active { display: flex; }
+  .loading-box { text-align: center; max-width: 400px; padding: 24px; }
+  .loading-box h3 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .loading-box .loading-sub { color: var(--text2); font-size: 15px; margin-bottom: 40px; }
+  .dots-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; }
+  .dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    animation: pulse-dot 1.4s ease-in-out infinite;
+  }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes pulse-dot { 0%,100%{opacity:0.2;transform:scale(0.7)} 50%{opacity:1;transform:scale(1)} }
+  .loading-steps { list-style: none; text-align: left; }
+  .loading-steps li { display: flex; align-items: center; gap: 12px; padding: 10px 0; color: var(--text2); font-size: 14px; border-bottom: 1px solid var(--border); opacity: 0.3; transition: opacity 0.4s; }
+  .loading-steps li.done { opacity: 1; color: var(--text); }
+  .loading-steps li .check { width: 20px; height: 20px; border-radius: 50%; background: var(--card2); border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+  .loading-steps li.done .check { background: linear-gradient(135deg, var(--accent1), var(--accent2)); border-color: transparent; color: #fff; }
+  .loading-msg { font-size: 16px; font-weight: 600; color: var(--text); min-height: 28px; margin-top: 24px; transition: opacity 0.3s; }
+
+  /* ─── RESULTS ─── */
+  #results { padding-top: 90px; min-height: 100vh; display: none; }
+  #results.active { display: block; }
+  .results-inner { max-width: 900px; margin: 0 auto; padding: 32px 24px 80px; }
+  .results-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 14px; }
+  .back-to-start { display: flex; align-items: center; gap: 8px; color: var(--text2); font-size: 14px; text-decoration: none; cursor: pointer; transition: color 0.18s; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border2); }
+  .back-to-start:hover { color: var(--text); border-color: var(--accent1); }
+  .results-title { font-size: clamp(22px, 4vw, 36px); font-weight: 800; letter-spacing: -1px; }
+  .results-title span { display: block; font-size: 15px; font-weight: 400; color: var(--text2); letter-spacing: 0; margin-top: 4px; }
+
+  .profile-summary { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 36px; }
+  .profile-chip {
+    padding: 6px 14px; border-radius: 50px; font-size: 13px; font-weight: 500;
+    background: rgba(124,58,237,0.12); border: 1px solid rgba(124,58,237,0.3); color: var(--text);
+  }
+
+  /* Phase tabs */
+  .phase-tabs-wrap { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 36px; overflow-x: auto; padding-bottom: 4px; }
+  .phase-tab {
+    display: flex; flex-direction: column; align-items: center; cursor: pointer;
+    padding: 14px 20px; border-radius: var(--radius); border: 1.5px solid var(--border2);
+    background: var(--card); transition: all 0.22s; min-width: 120px; text-align: center;
+  }
+  .phase-tab:hover { border-color: var(--accent1); }
+  .phase-tab.active {
+    border-color: transparent;
+    background: linear-gradient(var(--card), var(--card)) padding-box,
+                linear-gradient(135deg, var(--accent1), var(--accent2)) border-box;
+    border: 2px solid transparent;
+    box-shadow: 0 4px 20px rgba(124,58,237,0.3);
+  }
+  .phase-tab .tab-dot {
+    width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--text2);
+    margin-bottom: 8px; transition: all 0.22s;
+  }
+  .phase-tab.active .tab-dot { border-color: var(--accent1); background: var(--accent1); box-shadow: 0 0 8px var(--accent1); }
+  .phase-tab .tab-label { font-size: 13px; font-weight: 600; color: var(--text2); transition: color 0.22s; }
+  .phase-tab.active .tab-label { color: var(--text); }
+  .tab-arrow { color: var(--text2); font-size: 18px; padding: 0 8px; flex-shrink: 0; opacity: 0.5; }
+
+  /* Supplement cards */
+  .supps-list { display: flex; flex-direction: column; gap: 20px; }
+  .supp-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 28px; transition: all 0.25s;
+    animation: fadeInUp 0.35s ease both;
+  }
+  .supp-card:hover { border-color: var(--border2); box-shadow: var(--shadow); }
+  @keyframes fadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  .supp-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; }
+  .supp-name { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .supp-emoji { font-size: 28px; }
+  .supp-goal-bar { margin-bottom: 18px; }
+  .bar-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .bar-label-text { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .bar-score { font-size: 13px; font-weight: 700; color: var(--text); }
+  .bar-track { height: 8px; background: var(--card2); border-radius: 99px; overflow: hidden; }
+  .bar-fill {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent1), var(--accent2));
+    width: 0%; transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+  }
+  .supp-why { font-size: 14px; color: var(--text2); line-height: 1.65; margin-bottom: 18px; }
+  .supp-dose {
+    display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px;
+    background: var(--card2); border-radius: 50px; border: 1px solid var(--border2);
+    font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 24px;
+  }
+  .supp-dose .timing-icon { color: var(--accent1); }
+
+  /* Brand carousel */
+  .brand-carousel { border-top: 1px solid var(--border); padding-top: 20px; }
+  .carousel-label { font-size: 11px; font-weight: 700; color: var(--text2); letter-spacing: 1.5px; text-transform: uppercase; text-align: center; margin-bottom: 14px; }
+  .carousel-inner { display: flex; align-items: center; gap: 14px; }
+  .carousel-btn {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--card2); border: 1px solid var(--border2);
+    color: var(--text2); font-size: 16px; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; transition: all 0.18s;
+  }
+  .carousel-btn:hover { border-color: var(--accent1); color: var(--text); }
+  .brand-display { flex: 1; display: flex; align-items: center; gap: 16px; min-width: 0; }
+  .brand-img {
+    width: 64px; height: 64px; border-radius: 12px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 1px;
+  }
+  .brand-info { min-width: 0; flex: 1; }
+  .brand-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand-tagline { font-size: 12px; color: var(--text2); margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .buy-btn {
+    display: inline-block; padding: 9px 18px; border-radius: 50px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    color: #fff; font-size: 12px; font-weight: 700; text-decoration: none;
+    letter-spacing: 0.5px; transition: all 0.18s; cursor: pointer; border: none;
+  }
+  .buy-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  /* Footer */
+  footer { border-top: 1px solid var(--border); padding: 32px 24px; text-align: center; color: var(--text2); font-size: 13px; }
+  footer a { color: var(--text2); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 600px) {
+    .q-card { padding: 28px 20px; }
+    nav { padding: 16px 20px; }
+    .phase-tabs-wrap { justify-content: flex-start; }
+    .phase-tab { min-width: 100px; padding: 12px 14px; }
+    .budget-grid { grid-template-columns: 1fr 1fr; }
+    .hero { padding: 60px 20px 40px; }
+    .programs-section, .how-section { padding: 60px 20px; }
+  }
+
+  /* Validation error */
+  .error-hint { font-size: 13px; color: #ef4444; margin-top: 8px; display: none; }
+  .error-hint.show { display: block; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">SupplAI</div>
+  <div class="nav-links">
+    <a href="#" class="nav-link" onclick="showSection('landing'); return false;">Home</a>
+    <button class="btn btn-primary" style="padding:9px 20px;font-size:14px;" onclick="startQuestionnaire()">Get My Plan</button>
+  </div>
+</nav>
+
+<!-- ─── LANDING ─── -->
+<section id="landing" class="section active">
+  <div class="hero">
+    <div class="hero-badge">
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--accent1);display:inline-block;"></span>
+      AI-Powered Supplement Recommendations
+    </div>
+    <h1>Your body.<br><span class="gradient-text">Your supplements.</span></h1>
+    <p>Answer 5 quick questions and get a science-backed supplement plan tailored to your goals, training style, and budget.</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary" onclick="startQuestionnaire()">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        Get My Free Plan
+      </button>
+      <button class="btn btn-ghost">See How It Works</button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat"><div class="stat-num">50,000+</div><div class="stat-label">Plans Generated</div></div>
+    <div class="stat"><div class="stat-num">93%</div><div class="stat-label">User Satisfaction</div></div>
+    <div class="stat"><div class="stat-num">2 min</div><div class="stat-label">To Get Your Plan</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Personalized</div></div>
+  </div>
+
+  <!-- Program Cards -->
+  <div class="programs-section">
+    <h2>Choose Your <span class="gradient-text">Program</span></h2>
+    <p class="sub">Select a program to get your personalized plan</p>
+    <div class="programs-grid">
+      <div class="program-card active-card" onclick="startQuestionnaire()">
+        <div class="card-glow"></div>
+        <div class="program-icon">💊</div>
+        <h3>Supplement Program</h3>
+        <p>Fuel your training from warm-up to recovery. Get a personalized pre, intra, and post-workout supplement stack — with exact doses, timing, and brand picks tailored to your goals.</p>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="startQuestionnaire()">
+          Start Now
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </button>
+      </div>
+      <div class="program-card locked">
+        <div class="program-icon" style="font-size:20px;">🏋️</div>
+        <h3>Training Program</h3>
+        <p>A structured workout plan built around your schedule, fitness level, and performance goals. Launching soon.</p>
+        <span class="coming-soon-badge"><span class="lock-icon">🔒</span>Coming Soon</span>
+      </div>
+      <div class="program-card locked">
+        <div class="program-icon" style="font-size:20px;">🥗</div>
+        <h3>Diet Program</h3>
+        <p>Macro-optimized meal plans designed to fuel your training and accelerate your results. Launching soon.</p>
+        <span class="coming-soon-badge"><span class="lock-icon">🔒</span>Coming Soon</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- How It Works -->
+  <div class="how-section">
+    <h2>How It <span class="gradient-text">Works</span></h2>
+    <p class="sub">Science-backed recommendations in minutes</p>
+    <div class="steps-row">
+      <div class="step-item"><div class="step-num">1</div><h4>Set Your Goals</h4><p>Tell us what you want to achieve — weight loss, muscle, endurance or more.</p></div>
+      <div class="step-item"><div class="step-num">2</div><h4>Build Your Profile</h4><p>Share your training details, body stats, and dietary preferences.</p></div>
+      <div class="step-item"><div class="step-num">3</div><h4>AI Analyzes</h4><p>Our algorithm matches supplements to your exact profile and goals.</p></div>
+      <div class="step-item"><div class="step-num">4</div><h4>Get Your Plan</h4><p>Receive a phased plan with doses, timing, and top brand picks.</p></div>
+    </div>
+  </div>
+
+  <footer>
+    <p style="margin-bottom:8px;">SupplAI &copy; 2026 — Personalized Supplement Recommendations</p>
+    <p>This site contains affiliate links. We may earn a commission on purchases. Always consult a healthcare professional before starting any supplement regimen.</p>
+  </footer>
+</section>
+
+<!-- ─── QUESTIONNAIRE ─── -->
+<section id="questionnaire" class="section">
+  <div class="q-header">
+    <a class="back-link" onclick="goBackInQ()">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      <span id="back-link-text">Back</span>
+    </a>
+    <div class="progress-bar-wrap">
+      <div class="progress-label">
+        <span id="step-label">Step 1 of 5</span>
+        <span id="step-percent">20%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:20%"></div></div>
+    </div>
+  </div>
+
+  <!-- STEP 1: Goals -->
+  <div id="step-1" class="q-card">
+    <div class="q-step-label">Step 1 — Your Goal</div>
+    <h2>What are you training for?</h2>
+    <p class="hint">Select all that apply — your plan will be optimized for each.</p>
+    <div class="pills-grid" id="goals-grid">
+      <div class="chip" data-value="Lose Weight" onclick="toggleGoal(this)">Lose Weight</div>
+      <div class="chip" data-value="Build Muscle" onclick="toggleGoal(this)">Build Muscle</div>
+      <div class="chip" data-value="Endurance" onclick="toggleGoal(this)">Endurance</div>
+      <div class="chip" data-value="Peak Performance" onclick="toggleGoal(this)">Peak Performance</div>
+      <div class="chip" data-value="Body Recomposition" onclick="toggleGoal(this)">Body Recomposition</div>
+      <div class="chip" data-value="General Health" onclick="toggleGoal(this)">General Health</div>
+    </div>
+    <div class="error-hint" id="goals-error">Please select at least one goal to continue.</div>
+    <div class="q-footer">
+      <div class="spacer"></div>
+      <button class="btn btn-primary" onclick="nextStep(1)">
+        Continue
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Profile -->
+  <div id="step-2" class="q-card hidden">
+    <div class="q-step-label">Step 2 — Your Profile</div>
+    <h2>Tell us about yourself</h2>
+    <p class="hint">Used to calculate optimal dosages and recommendations.</p>
+
+    <div class="field-group">
+      <div class="field-label">Age</div>
+      <input type="number" class="text-input" id="age-input" placeholder="e.g. 28" min="16" max="99" style="max-width:180px;">
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Biological Sex</div>
+      <div class="toggle-group" id="sex-group">
+        <div class="toggle-btn" data-value="Male" onclick="selectToggle('sex-group', this)">Male</div>
+        <div class="toggle-btn" data-value="Female" onclick="selectToggle('sex-group', this)">Female</div>
+        <div class="toggle-btn" data-value="Other" onclick="selectToggle('sex-group', this)">Other</div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Weight</div>
+      <div class="input-row">
+        <input type="number" class="text-input" id="weight-input" placeholder="e.g. 75" min="30" max="300" style="max-width:160px;">
+        <div class="unit-toggle" id="weight-unit-toggle">
+          <button class="unit-btn active" data-unit="kg" onclick="setUnit('weight', 'kg', this)">kg</button>
+          <button class="unit-btn" data-unit="lbs" onclick="setUnit('weight', 'lbs', this)">lbs</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Height</div>
+      <div class="input-row">
+        <input type="number" class="text-input" id="height-input" placeholder="e.g. 178" min="100" max="250" style="max-width:160px;">
+        <div class="unit-toggle" id="height-unit-toggle">
+          <button class="unit-btn active" data-unit="cm" onclick="setUnit('height', 'cm', this)">cm</button>
+          <button class="unit-btn" data-unit="ft" onclick="setUnit('height', 'ft', this)">ft/in</button>
+        </div>
+      </div>
+      <div id="height-ftin" style="display:none;margin-top:10px;">
+        <div class="input-row">
+          <input type="number" class="text-input" id="height-ft" placeholder="ft" min="4" max="7" style="max-width:100px;">
+          <input type="number" class="text-input" id="height-in" placeholder="in" min="0" max="11" style="max-width:100px;">
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Dietary Restrictions</div>
+      <div class="pills-grid" id="diet-grid">
+        <div class="chip selected" data-value="None" onclick="toggleDiet(this)">None</div>
+        <div class="chip" data-value="Vegan" onclick="toggleDiet(this)">Vegan</div>
+        <div class="chip" data-value="Vegetarian" onclick="toggleDiet(this)">Vegetarian</div>
+        <div class="chip" data-value="Lactose-Free" onclick="toggleDiet(this)">Lactose-Free</div>
+        <div class="chip" data-value="Gluten-Free" onclick="toggleDiet(this)">Gluten-Free</div>
+      </div>
+    </div>
+    <div class="error-hint" id="profile-error">Please fill in your age and select your sex.</div>
+    <div class="q-footer">
+      <button class="btn btn-ghost" onclick="prevStep(2)">Back</button>
+      <button class="btn btn-primary" onclick="nextStep(2)">Continue <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg></button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Training -->
+  <div id="step-3" class="q-card hidden">
+    <div class="q-step-label">Step 3 — Training</div>
+    <h2>How do you train?</h2>
+    <p class="hint">This shapes your supplement timing and type recommendations.</p>
+
+    <div class="field-group">
+      <div class="field-label">Fitness Level</div>
+      <div class="toggle-group" id="level-group">
+        <div class="toggle-btn" data-value="Beginner" onclick="selectToggle('level-group', this)">Beginner</div>
+        <div class="toggle-btn" data-value="Intermediate" onclick="selectToggle('level-group', this)">Intermediate</div>
+        <div class="toggle-btn" data-value="Advanced" onclick="selectToggle('level-group', this)">Advanced</div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Sessions Per Week</div>
+      <div class="toggle-group" id="sessions-group">
+        <div class="toggle-btn" data-value="1-2" onclick="selectToggle('sessions-group', this)">1–2</div>
+        <div class="toggle-btn" data-value="3-4" onclick="selectToggle('sessions-group', this)">3–4</div>
+        <div class="toggle-btn" data-value="5-6" onclick="selectToggle('sessions-group', this)">5–6</div>
+        <div class="toggle-btn" data-value="7+" onclick="selectToggle('sessions-group', this)">7+</div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Session Duration</div>
+      <div class="toggle-group" id="duration-group">
+        <div class="toggle-btn" data-value="<30min" onclick="selectToggle('duration-group', this)">&lt;30 min</div>
+        <div class="toggle-btn" data-value="30-60min" onclick="selectToggle('duration-group', this)">30–60 min</div>
+        <div class="toggle-btn" data-value="60-90min" onclick="selectToggle('duration-group', this)">60–90 min</div>
+        <div class="toggle-btn" data-value="90min+" onclick="selectToggle('duration-group', this)">90 min+</div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Training Style</div>
+      <div class="pills-grid" id="style-grid">
+        <div class="chip" data-value="Weights" onclick="toggleStyle(this)">Weights</div>
+        <div class="chip" data-value="Cardio" onclick="toggleStyle(this)">Cardio</div>
+        <div class="chip" data-value="HIIT" onclick="toggleStyle(this)">HIIT</div>
+        <div class="chip" data-value="Cycling" onclick="toggleStyle(this)">Cycling</div>
+        <div class="chip" data-value="Mixed" onclick="toggleStyle(this)">Mixed</div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Training Time of Day</div>
+      <div class="toggle-group" id="time-group">
+        <div class="toggle-btn" data-value="Morning" onclick="selectToggle('time-group', this)">Morning</div>
+        <div class="toggle-btn" data-value="Afternoon" onclick="selectToggle('time-group', this)">Afternoon</div>
+        <div class="toggle-btn" data-value="Evening" onclick="selectToggle('time-group', this)">Evening</div>
+        <div class="toggle-btn" data-value="Night" onclick="selectToggle('time-group', this)">Night</div>
+      </div>
+    </div>
+    <div class="error-hint" id="training-error">Please complete all fields to continue.</div>
+    <div class="q-footer">
+      <button class="btn btn-ghost" onclick="prevStep(3)">Back</button>
+      <button class="btn btn-primary" onclick="nextStep(3)">Continue <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg></button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Budget & Experience -->
+  <div id="step-4" class="q-card hidden">
+    <div class="q-step-label">Step 4 — Budget & Experience</div>
+    <h2>Budget &amp; supplement background</h2>
+    <p class="hint">We'll make sure your plan fits your wallet and experience level.</p>
+
+    <div class="field-group">
+      <div class="field-label">Monthly Supplement Budget</div>
+      <div class="budget-grid" id="budget-group">
+        <div class="budget-card" data-value="<$30" onclick="selectBudget(this)">
+          <div class="budget-amount gradient-text">&lt;$30</div>
+          <div class="budget-label">Essentials only</div>
+        </div>
+        <div class="budget-card" data-value="$30-60" onclick="selectBudget(this)">
+          <div class="budget-amount gradient-text">$30–60</div>
+          <div class="budget-label">Solid starter stack</div>
+        </div>
+        <div class="budget-card" data-value="$60-100" onclick="selectBudget(this)">
+          <div class="budget-amount gradient-text">$60–100</div>
+          <div class="budget-label">Full performance stack</div>
+        </div>
+        <div class="budget-card" data-value="$100+" onclick="selectBudget(this)">
+          <div class="budget-amount gradient-text">$100+</div>
+          <div class="budget-label">Elite optimization</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Current Supplement Experience</div>
+      <div class="toggle-group" id="exp-group">
+        <div class="toggle-btn" data-value="None" onclick="selectToggle('exp-group', this)">None</div>
+        <div class="toggle-btn" data-value="Basic" onclick="selectToggle('exp-group', this)">Basic</div>
+        <div class="toggle-btn" data-value="Advanced" onclick="selectToggle('exp-group', this)">Advanced</div>
+      </div>
+    </div>
+    <div class="error-hint" id="budget-error">Please select a budget and experience level.</div>
+    <div class="q-footer">
+      <button class="btn btn-ghost" onclick="prevStep(4)">Back</button>
+      <button class="btn btn-primary" onclick="nextStep(4)">Continue <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg></button>
+    </div>
+  </div>
+
+  <!-- STEP 5: Email -->
+  <div id="step-5" class="q-card hidden">
+    <div class="q-step-label">Step 5 — Final Step</div>
+    <h2>Where should we send your plan?</h2>
+    <p class="hint">Your personalized plan will be ready in seconds.</p>
+
+    <div class="email-note">
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:var(--accent1);margin-top:1px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+      Your email is only used to send your plan and supplement tips. No spam, ever. Unsubscribe anytime.
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Email Address</div>
+      <input type="email" class="text-input" id="email-input" placeholder="you@example.com">
+    </div>
+
+    <div class="field-group" style="margin-bottom:0;">
+      <label class="consent-row">
+        <input type="checkbox" id="consent-check">
+        <span>I agree to receive my personalized supplement plan and occasional supplement tips from SupplAI. You can unsubscribe at any time.</span>
+      </label>
+    </div>
+    <div class="error-hint" id="email-error">Please enter a valid email and accept the terms.</div>
+    <div class="q-footer">
+      <button class="btn btn-ghost" onclick="prevStep(5)">Back</button>
+      <button class="btn btn-primary" onclick="generatePlan()" style="padding:14px 32px;font-size:16px;">
+        Generate My Plan
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ─── LOADING ─── -->
+<section id="loading" class="section">
+  <div class="loading-box">
+    <h3>Building Your Plan</h3>
+    <p class="loading-sub">This only takes a moment...</p>
+    <div class="dots-row">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+    <ul class="loading-steps" id="loading-steps">
+      <li id="ls-1"><span class="check">1</span> Analyzing your profile</li>
+      <li id="ls-2"><span class="check">2</span> Matching supplement science</li>
+      <li id="ls-3"><span class="check">3</span> Calculating optimal doses</li>
+      <li id="ls-4"><span class="check">4</span> Selecting top brands</li>
+      <li id="ls-5"><span class="check">5</span> Assembling your plan</li>
+    </ul>
+    <div class="loading-msg" id="loading-msg">Analyzing your profile...</div>
+  </div>
+</section>
+
+<!-- ─── RESULTS ─── -->
+<section id="results" class="section">
+  <div class="results-inner">
+    <div class="results-topbar">
+      <a class="back-to-start" onclick="showSection('landing')">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        Back to Start
+      </a>
+      <div style="text-align:right;">
+        <div class="results-title">Your Supplement Plan <span id="results-subtitle">Personalized for your goals</span></div>
+      </div>
+    </div>
+
+    <div class="profile-summary" id="profile-summary"></div>
+
+    <div class="phase-tabs-wrap" id="phase-tabs">
+      <div class="phase-tab active" data-phase="pre" onclick="switchPhase('pre')">
+        <div class="tab-dot"></div>
+        <div class="tab-label">Pre-Workout</div>
+      </div>
+      <div class="tab-arrow">&#8594;</div>
+      <div class="phase-tab" data-phase="during" onclick="switchPhase('during')">
+        <div class="tab-dot"></div>
+        <div class="tab-label">During</div>
+      </div>
+      <div class="tab-arrow">&#8594;</div>
+      <div class="phase-tab" data-phase="post" onclick="switchPhase('post')">
+        <div class="tab-dot"></div>
+        <div class="tab-label">Post-Workout</div>
+      </div>
+    </div>
+
+    <div class="supps-list" id="supps-list"></div>
+  </div>
+  <footer>
+    <p style="margin-bottom:8px;">SupplAI &copy; 2026 — Personalized Supplement Recommendations</p>
+    <p>Affiliate disclosure: This site contains affiliate links. We may earn a commission on purchases at no extra cost to you. Always consult a healthcare professional before starting any supplement regimen.</p>
+  </footer>
+</section>
+
+<script>
+// ──────────────────────────────────────────────
+//  STATE
+// ──────────────────────────────────────────────
+const state = {
+  currentStep: 1,
+  goals: [],
+  age: null, sex: null, weightKg: null, heightCm: null, diet: ['None'],
+  weightUnit: 'kg', heightUnit: 'cm',
+  fitnessLevel: null, sessionsPerWeek: null, duration: null, trainingStyle: [], trainingTime: null,
+  budget: null, experience: null,
+  email: '',
+  plan: { pre: [], during: [], post: [] },
+  activePhase: 'pre',
+  animatedPhases: new Set()
+};
+
+// ──────────────────────────────────────────────
+//  NAVIGATION
+// ──────────────────────────────────────────────
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function startQuestionnaire() {
+  showSection('questionnaire');
+  goToStep(1);
+}
+
+function goBackInQ() {
+  if (state.currentStep === 1) {
+    showSection('landing');
+  } else {
+    prevStep(state.currentStep);
+  }
+}
+
+function updateProgress(step) {
+  const pct = (step / 5) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('step-label').textContent = `Step ${step} of 5`;
+  document.getElementById('step-percent').textContent = Math.round(pct) + '%';
+  document.getElementById('back-link-text').textContent = step === 1 ? 'Home' : 'Back';
+}
+
+function goToStep(n) {
+  for (let i = 1; i <= 5; i++) {
+    document.getElementById(`step-${i}`).classList.add('hidden');
+  }
+  document.getElementById(`step-${n}`).classList.remove('hidden');
+  state.currentStep = n;
+  updateProgress(n);
+  window.scrollTo(0, 0);
+}
+
+function prevStep(current) { goToStep(current - 1); }
+
+// ──────────────────────────────────────────────
+//  STEP VALIDATION + ADVANCE
+// ──────────────────────────────────────────────
+function nextStep(step) {
+  if (step === 1) {
+    if (state.goals.length === 0) {
+      document.getElementById('goals-error').classList.add('show'); return;
+    }
+    document.getElementById('goals-error').classList.remove('show');
+    goToStep(2);
+
+  } else if (step === 2) {
+    const age = parseInt(document.getElementById('age-input').value);
+    const sex = getToggleVal('sex-group');
+    if (!age || age < 16 || !sex) {
+      document.getElementById('profile-error').classList.add('show'); return;
+    }
+    document.getElementById('profile-error').classList.remove('show');
+    state.age = age;
+    state.sex = sex;
+    // weight
+    const w = parseFloat(document.getElementById('weight-input').value);
+    if (w) {
+      state.weightKg = state.weightUnit === 'lbs' ? w / 2.2046 : w;
+    }
+    // height
+    if (state.heightUnit === 'cm') {
+      const h = parseFloat(document.getElementById('height-input').value);
+      if (h) state.heightCm = h;
+    } else {
+      const ft = parseFloat(document.getElementById('height-ft').value) || 0;
+      const inch = parseFloat(document.getElementById('height-in').value) || 0;
+      state.heightCm = (ft * 30.48) + (inch * 2.54);
+    }
+    goToStep(3);
+
+  } else if (step === 3) {
+    const level = getToggleVal('level-group');
+    const sessions = getToggleVal('sessions-group');
+    const duration = getToggleVal('duration-group');
+    const time = getToggleVal('time-group');
+    if (!level || !sessions || !duration || !time || state.trainingStyle.length === 0) {
+      document.getElementById('training-error').classList.add('show'); return;
+    }
+    document.getElementById('training-error').classList.remove('show');
+    state.fitnessLevel = level; state.sessionsPerWeek = sessions;
+    state.duration = duration; state.trainingTime = time;
+    goToStep(4);
+
+  } else if (step === 4) {
+    const budget = state.budget;
+    const exp = getToggleVal('exp-group');
+    if (!budget || !exp) {
+      document.getElementById('budget-error').classList.add('show'); return;
+    }
+    document.getElementById('budget-error').classList.remove('show');
+    state.experience = exp;
+    goToStep(5);
+  }
+}
+
+// ──────────────────────────────────────────────
+//  FORM HELPERS
+// ──────────────────────────────────────────────
+function toggleGoal(el) {
+  el.classList.toggle('selected');
+  const val = el.dataset.value;
+  if (state.goals.includes(val)) state.goals = state.goals.filter(g => g !== val);
+  else state.goals.push(val);
+}
+
+function toggleDiet(el) {
+  const val = el.dataset.value;
+  if (val === 'None') {
+    document.querySelectorAll('#diet-grid .chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    state.diet = ['None'];
+  } else {
+    document.querySelector('#diet-grid .chip[data-value="None"]').classList.remove('selected');
+    el.classList.toggle('selected');
+    state.diet = state.diet.filter(d => d !== 'None');
+    if (el.classList.contains('selected')) {
+      if (!state.diet.includes(val)) state.diet.push(val);
+    } else {
+      state.diet = state.diet.filter(d => d !== val);
+    }
+    if (state.diet.length === 0) {
+      document.querySelector('#diet-grid .chip[data-value="None"]').classList.add('selected');
+      state.diet = ['None'];
+    }
+  }
+}
+
+function toggleStyle(el) {
+  el.classList.toggle('selected');
+  const val = el.dataset.value;
+  if (state.trainingStyle.includes(val)) state.trainingStyle = state.trainingStyle.filter(s => s !== val);
+  else state.trainingStyle.push(val);
+}
+
+function selectToggle(groupId, el) {
+  document.querySelectorAll(`#${groupId} .toggle-btn`).forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function getToggleVal(groupId) {
+  const el = document.querySelector(`#${groupId} .toggle-btn.selected`);
+  return el ? el.dataset.value : null;
+}
+
+function setUnit(type, unit, btn) {
+  document.querySelectorAll(`#${type}-unit-toggle .unit-btn`).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (type === 'weight') {
+    state.weightUnit = unit;
+  } else {
+    state.heightUnit = unit;
+    document.getElementById('height-input').closest('.input-row').style.display = unit === 'cm' ? 'flex' : 'none';
+    document.getElementById('height-ftin').style.display = unit === 'ft' ? 'block' : 'none';
+  }
+}
+
+function selectBudget(el) {
+  document.querySelectorAll('#budget-group .budget-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.budget = el.dataset.value;
+}
+
+// ──────────────────────────────────────────────
+//  BRAND DATABASE
+// ──────────────────────────────────────────────
+const BRANDS = {
+  'Whey Protein': [
+    { name: 'Optimum Nutrition', tagline: 'Gold Standard quality since 1986', abbr: 'ON' },
+    { name: 'Myprotein', tagline: 'Europe\'s #1 sports nutrition brand', abbr: 'MP' },
+    { name: 'Dymatize', tagline: 'Precision nutrition for elite athletes', abbr: 'DY' },
+    { name: 'BSN', tagline: 'Finish First — always', abbr: 'BSN' }
+  ],
+  'Plant Protein': [
+    { name: 'Garden of Life', tagline: 'Certified organic, whole-food protein', abbr: 'GOL' },
+    { name: 'Vega', tagline: 'Plant-based fuel for every body', abbr: 'VEG' },
+    { name: 'Myprotein', tagline: 'Europe\'s #1 sports nutrition brand', abbr: 'MP' },
+    { name: 'Bulk', tagline: 'No nonsense. Just gains.', abbr: 'BLK' }
+  ],
+  'Creatine': [
+    { name: 'Optimum Nutrition', tagline: 'The gold standard in creatine monohydrate', abbr: 'ON' },
+    { name: 'Myprotein', tagline: 'Pure creatine, unbeatable value', abbr: 'MP' },
+    { name: 'Bulk', tagline: 'Lab-tested, no fluff, full dose', abbr: 'BLK' },
+    { name: 'Nutricost', tagline: 'Effective. Simple. Affordable.', abbr: 'NTC' }
+  ],
+  'Caffeine': [
+    { name: 'Bulk', tagline: 'Clean caffeine, pharmaceutical grade', abbr: 'BLK' },
+    { name: 'Nutricost', tagline: 'No frills, full focus', abbr: 'NTC' },
+    { name: 'NOW Foods', tagline: 'Trusted natural supplements since 1968', abbr: 'NOW' },
+    { name: 'GNC', tagline: 'Live well with GNC', abbr: 'GNC' }
+  ],
+  'Beta-Alanine': [
+    { name: 'NOW Foods', tagline: 'Sports tested CarnoSyn beta-alanine', abbr: 'NOW' },
+    { name: 'Bulk', tagline: 'Pure CarnoSyn, full clinical dose', abbr: 'BLK' },
+    { name: 'Nutricost', tagline: 'Science-backed endurance support', abbr: 'NTC' },
+    { name: 'Cellucor', tagline: 'Feel the tingle. Feel the gains.', abbr: 'CEL' }
+  ],
+  'BCAAs': [
+    { name: 'Myprotein', tagline: 'Instantized 2:1:1 BCAA ratio', abbr: 'MP' },
+    { name: 'Optimum Nutrition', tagline: 'Gold Standard amino acids', abbr: 'ON' },
+    { name: 'Scivation', tagline: 'Xtend — the world\'s #1 BCAA brand', abbr: 'SCI' },
+    { name: 'BSN', tagline: 'Amino X — advanced amino formula', abbr: 'BSN' }
+  ],
+  'Electrolytes': [
+    { name: 'Liquid I.V.', tagline: 'Hydration multiplier technology', abbr: 'LIV' },
+    { name: 'LMNT', tagline: 'No sugar. Just sodium, potassium, magnesium.', abbr: 'LMT' },
+    { name: 'Nuun', tagline: 'Clean hydration for every athlete', abbr: 'NUN' },
+    { name: 'GNC', tagline: 'Performance hydration you can trust', abbr: 'GNC' }
+  ],
+  'Omega-3': [
+    { name: 'Nordic Naturals', tagline: 'The world\'s #1 omega-3 brand', abbr: 'NN' },
+    { name: 'NOW Foods', tagline: 'Ultra-concentrated EPA+DHA', abbr: 'NOW' },
+    { name: 'Thorne', tagline: 'Pharmaceutical-grade fish oil', abbr: 'THR' },
+    { name: 'Garden of Life', tagline: 'Certified sustainable, molecularly distilled', abbr: 'GOL' }
+  ],
+  'Magnesium': [
+    { name: 'Thorne', tagline: 'Bisglycinate form for maximum absorption', abbr: 'THR' },
+    { name: 'NOW Foods', tagline: 'Full-spectrum magnesium support', abbr: 'NOW' },
+    { name: 'Life Extension', tagline: 'Clinically studied magnesium L-threonate', abbr: 'LE' },
+    { name: 'Garden of Life', tagline: 'Whole-food organic magnesium blend', abbr: 'GOL' }
+  ],
+  'L-Citrulline': [
+    { name: 'Transparent Labs', tagline: 'Clinical doses. Zero proprietary blends.', abbr: 'TL' },
+    { name: 'Bulk', tagline: 'Fermented, ultra-pure L-Citrulline', abbr: 'BLK' },
+    { name: 'NOW Foods', tagline: 'Pharmaceutical grade amino acid', abbr: 'NOW' },
+    { name: 'Nutricost', tagline: 'Pure citrulline at an honest price', abbr: 'NTC' }
+  ],
+  'Ashwagandha': [
+    { name: 'KSM-66', tagline: 'The most clinically studied ashwagandha extract', abbr: 'KSM' },
+    { name: 'NOW Foods', tagline: 'Full-spectrum Sensoril ashwagandha', abbr: 'NOW' },
+    { name: 'Thorne', tagline: 'Pharma-grade adaptogen for stress and strength', abbr: 'THR' },
+    { name: 'Garden of Life', tagline: 'Organic certified whole root powder', abbr: 'GOL' }
+  ],
+  'ZMA': [
+    { name: 'NOW Foods', tagline: 'Original ZMA zinc, magnesium & B6 formula', abbr: 'NOW' },
+    { name: 'Optimum Nutrition', tagline: 'Recovery and hormone support blend', abbr: 'ON' },
+    { name: 'Bulk', tagline: 'High-strength ZMA at great value', abbr: 'BLK' },
+    { name: 'GNC', tagline: 'Proven sleep and testosterone formula', abbr: 'GNC' }
+  ],
+  'Carbohydrates (Fast)': [
+    { name: 'Maurten', tagline: 'The fuel of world champions', abbr: 'MAU' },
+    { name: 'SIS', tagline: 'Science in Sport — lab-tested carbs', abbr: 'SIS' },
+    { name: 'GU Energy', tagline: 'Engineered for performance since 1993', abbr: 'GU' },
+    { name: 'Myprotein', tagline: 'Pure waxy maize starch for endurance', abbr: 'MP' }
+  ]
+};
+
+// ──────────────────────────────────────────────
+//  SUPPLEMENT LOGIC
+// ──────────────────────────────────────────────
+function computeScore(supp, goals, data) {
+  const g = goals;
+  const s = {
+    'Caffeine': g.includes('Peak Performance') || g.includes('Endurance') ? 95 : g.includes('Build Muscle') ? 85 : 75,
+    'Creatine': g.includes('Build Muscle') ? 98 : g.includes('Peak Performance') ? 90 : g.includes('Body Recomposition') ? 88 : 80,
+    'Beta-Alanine': g.includes('Endurance') ? 92 : data.trainingStyle.includes('HIIT') ? 90 : g.includes('Build Muscle') ? 80 : 75,
+    'L-Citrulline': g.includes('Peak Performance') ? 92 : g.includes('Build Muscle') ? 88 : g.includes('Endurance') ? 85 : 78,
+    'Ashwagandha': g.includes('General Health') ? 85 : g.includes('Lose Weight') ? 78 : 72,
+    'BCAAs': g.includes('Endurance') ? 88 : g.includes('Build Muscle') ? 82 : 78,
+    'Electrolytes': g.includes('Cycling') ? 92 : g.includes('Endurance') ? 90 : data.trainingStyle.includes('HIIT') ? 88 : 78,
+    'Carbohydrates (Fast)': g.includes('Endurance') ? 95 : g.includes('Cycling') ? 92 : 78,
+    'Whey Protein': g.includes('Build Muscle') ? 98 : g.includes('Body Recomposition') ? 92 : g.includes('Lose Weight') ? 85 : 80,
+    'Plant Protein': g.includes('Build Muscle') ? 98 : g.includes('Body Recomposition') ? 92 : g.includes('Lose Weight') ? 85 : 80,
+    'Omega-3': g.includes('General Health') ? 88 : g.includes('Lose Weight') ? 82 : 75,
+    'Magnesium': g.includes('General Health') ? 85 : ['Evening','Night'].includes(data.trainingTime) ? 90 : 78,
+    'ZMA': g.includes('Build Muscle') ? 82 : g.includes('Peak Performance') ? 80 : 75
+  };
+  return s[supp] || 75;
+}
+
+function getWhyText(supp, goals, data) {
+  const g = goals.join(', ');
+  const texts = {
+    'Caffeine': `Caffeine directly enhances focus, reaction time, and power output — key factors for your ${goals[0]} goal. By blocking adenosine receptors it reduces perceived effort, letting you push harder and longer in every session.`,
+    'Creatine': goals.includes('Build Muscle')
+      ? `Creatine saturates your muscle cells with phosphocreatine, directly boosting your strength output and enabling the progressive overload needed to build muscle mass.`
+      : `Creatine replenishes ATP stores rapidly, translating to more reps, more power, and better performance — precisely what your ${goals[0]} goal demands.`,
+    'Beta-Alanine': goals.includes('Endurance')
+      ? `Beta-alanine buffers lactic acid buildup in muscle tissue, extending your time to fatigue — the critical limiting factor in endurance training.`
+      : `Beta-alanine increases muscle carnosine levels, delaying the burn during high-intensity intervals and helping you sustain peak output across more sets.`,
+    'L-Citrulline': goals.includes('Build Muscle')
+      ? `L-Citrulline drives nitric oxide production for exceptional muscle pumps and increased blood flow to working muscles, directly enhancing nutrient delivery for muscle growth.`
+      : `L-Citrulline amplifies nitric oxide synthesis, reducing fatigue and improving aerobic efficiency — critical for your ${goals[0]} goal.`,
+    'Ashwagandha': goals.includes('General Health')
+      ? `Ashwagandha (KSM-66) reduces cortisol by up to 28%, improves sleep quality, and supports healthy testosterone levels — foundational pillars of overall health and recovery.`
+      : `Ashwagandha blunts cortisol spikes after ${data.trainingTime?.toLowerCase() || 'evening'} training, promoting deeper sleep and faster recovery while supporting body composition goals.`,
+    'BCAAs': goals.includes('Build Muscle')
+      ? `BCAAs (especially leucine) directly trigger muscle protein synthesis. Taking them during long sessions prevents muscle catabolism and primes your body for growth.`
+      : `BCAAs reduce exercise-induced muscle damage and mental fatigue during sessions exceeding 60 minutes, helping you maintain form and intensity throughout.`,
+    'Electrolytes': data.trainingStyle.includes('HIIT') || goals.includes('Endurance')
+      ? `High-intensity and endurance training causes significant electrolyte losses through sweat. Replenishing sodium, potassium, and magnesium during exercise maintains power output and prevents cramping.`
+      : `Even moderate sweat losses impair performance by 2-3%. Electrolytes maintain fluid balance and nerve conduction, keeping you sharp and powerful throughout your session.`,
+    'Carbohydrates (Fast)': goals.includes('Endurance')
+      ? `Fast-acting carbohydrates are the primary fuel for endurance work. Consuming 30-60g per hour prevents glycogen depletion — the primary cause of hitting the wall in endurance events.`
+      : `During long sessions, fast carbs maintain blood glucose and muscle glycogen, preserving performance quality and preventing premature fatigue.`,
+    'Whey Protein': goals.includes('Build Muscle')
+      ? `Whey protein delivers a rapid spike of leucine — the master trigger for muscle protein synthesis. Its fast absorption makes it ideal post-workout when your muscles are primed for growth.`
+      : goals.includes('Lose Weight')
+      ? `Whey protein is the most satiety-inducing macronutrient per calorie. Post-workout consumption preserves lean muscle during a deficit, ensuring you lose fat, not muscle.`
+      : `Whey protein provides all essential amino acids in optimal ratios, accelerating muscle repair after training and supporting your body composition goals.`,
+    'Plant Protein': `Plant protein delivers a complete amino acid profile from whole-food sources, supporting muscle repair and recovery without animal products — perfectly aligned with your dietary choices and ${goals[0]} goal.`,
+    'Omega-3': goals.includes('General Health')
+      ? `Omega-3 EPA+DHA are the most well-researched supplements for cardiovascular health, inflammation reduction, and cognitive function — three pillars of long-term wellbeing.`
+      : `Omega-3 reduces exercise-induced inflammation and muscle soreness, accelerating recovery between sessions and supporting your ${goals[0]} journey.`,
+    'Magnesium': ['Evening','Night'].includes(data.trainingTime)
+      ? `Evening training elevates cortisol at a time when it should be declining. Magnesium glycinate rebalances this, improving sleep quality, reducing overnight muscle tension, and enhancing recovery.`
+      : `Magnesium is depleted by intense training and is a cofactor in over 300 enzymatic reactions including ATP production, protein synthesis, and muscle relaxation — critical for ${goals[0]}.`,
+    'ZMA': `ZMA's synergistic combination of zinc, magnesium, and B6 supports testosterone and IGF-1 levels during sleep — the optimal hormonal window for muscle repair and growth during your ${goals[0]} phase.`
+  };
+  return texts[supp] || `${supp} is a well-researched supplement that directly supports your ${g} goals through its evidence-based mechanisms.`;
+}
+
+function getDoseText(supp, data) {
+  const weight = data.weightKg || 75;
+  const doses = {
+    'Caffeine': `${weight < 70 ? '150mg' : '200mg'} · 30-45 min before workout`,
+    'Creatine': '5g · Any time, consistency matters most',
+    'Beta-Alanine': '3.2g · 30 min before workout (tingling is normal)',
+    'L-Citrulline': '6-8g · 30-45 min before workout',
+    'Ashwagandha': '600mg · With meal, 1-2 hours before sleep',
+    'BCAAs': '10g · Sip throughout your workout',
+    'Electrolytes': '1 serving · Mix in water, drink during workout',
+    'Carbohydrates (Fast)': '30-60g per hour · Consume during activity',
+    'Whey Protein': '25-30g · Within 30 min post-workout',
+    'Plant Protein': '25-30g · Within 30 min post-workout',
+    'Omega-3': '1-2g EPA+DHA · With a fatty meal',
+    'Magnesium': '300-400mg · 30-60 min before bed',
+    'ZMA': '1 serving · On empty stomach, 30-60 min before bed'
+  };
+  return doses[supp] || '1 serving · As directed';
+}
+
+const EMOJIS = {
+  'Caffeine': '💊', 'Creatine': '💪', 'Beta-Alanine': '⚡', 'L-Citrulline': '🔥',
+  'Ashwagandha': '🌿', 'BCAAs': '🥤', 'Electrolytes': '💧', 'Carbohydrates (Fast)': '⚡',
+  'Whey Protein': '🥛', 'Plant Protein': '🌱', 'Omega-3': '🐟', 'Magnesium': '🧲', 'ZMA': '🌙'
+};
+
+function buildPlan(data) {
+  const { goals, diet, trainingStyle, trainingTime, duration, sessionsPerWeek, experience, budget, weightKg } = data;
+  const isVegan = diet.includes('Vegan');
+  const isEveningNight = ['Evening','Night'].includes(trainingTime);
+  const isLongSession = ['60-90min','90min+'].includes(duration);
+  const isHighFreq = ['5-6','7+'].includes(sessionsPerWeek);
+
+  let pre = [], during = [], post = [];
+
+  // PRE
+  if (!isEveningNight) {
+    pre.push('Caffeine');
+  }
+  if (goals.some(g => ['Build Muscle','Peak Performance','Body Recomposition'].includes(g))) {
+    pre.push('Creatine');
+  }
+  if (goals.some(g => ['Endurance','Build Muscle'].includes(g)) || trainingStyle.includes('HIIT')) {
+    pre.push('Beta-Alanine');
+  }
+  if (goals.some(g => ['Build Muscle','Peak Performance','Endurance'].includes(g))) {
+    pre.push('L-Citrulline');
+  }
+  if (goals.some(g => ['General Health','Lose Weight'].includes(g)) || isEveningNight) {
+    pre.push('Ashwagandha');
+  }
+
+  // DURING
+  if (isLongSession || goals.some(g => ['Build Muscle','Endurance'].includes(g))) {
+    during.push('BCAAs');
+  }
+  if (isLongSession || trainingStyle.some(s => ['HIIT','Cycling'].includes(s)) || duration !== '<30min') {
+    during.push('Electrolytes');
+  }
+  if (goals.some(g => ['Endurance','Cycling'].includes(g)) || isLongSession) {
+    during.push('Carbohydrates (Fast)');
+  }
+
+  // POST
+  if (isVegan) post.push('Plant Protein');
+  else post.push('Whey Protein');
+
+  if (!pre.includes('Creatine') && goals.some(g => ['Build Muscle','Peak Performance','Body Recomposition'].includes(g))) {
+    post.push('Creatine');
+  }
+  if (!isVegan && (goals.some(g => ['General Health','Lose Weight'].includes(g)) || budget !== '<$30')) {
+    post.push('Omega-3');
+  }
+  if (isEveningNight || goals.includes('General Health') || isHighFreq) {
+    post.push('Magnesium');
+  }
+  if (experience === 'Advanced' && data.sex === 'Male' && isEveningNight) {
+    post.push('ZMA');
+  }
+
+  // Budget limit
+  const limits = { '<$30': 3, '$30-60': 6, '$60-100': 8, '$100+': 999 };
+  const maxTotal = limits[budget] || 999;
+
+  // Score all and pick top
+  const scoreAll = arr => arr.map(s => ({ name: s, score: computeScore(s, goals, data) }))
+                             .sort((a, b) => b.score - a.score);
+
+  const allScored = [
+    ...scoreAll(pre).map(s => ({ ...s, phase: 'pre' })),
+    ...scoreAll(during).map(s => ({ ...s, phase: 'during' })),
+    ...scoreAll(post).map(s => ({ ...s, phase: 'post' }))
+  ].sort((a, b) => b.score - a.score).slice(0, maxTotal);
+
+  const result = { pre: [], during: [], post: [] };
+  allScored.forEach(s => result[s.phase].push(s));
+
+  // Ensure at least 1 per phase if any exist
+  ['pre','during','post'].forEach(p => {
+    if (result[p].length === 0) {
+      const candidates = (p === 'pre' ? pre : p === 'during' ? during : post);
+      if (candidates.length > 0) {
+        const best = scoreAll(candidates)[0];
+        result[p].push({ ...best, phase: p });
+      }
+    }
+  });
+
+  return result;
+}
+
+// ──────────────────────────────────────────────
+//  GENERATE PLAN
+// ──────────────────────────────────────────────
+function generatePlan() {
+  const email = document.getElementById('email-input').value.trim();
+  const consent = document.getElementById('consent-check').checked;
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!emailValid || !consent) {
+    document.getElementById('email-error').classList.add('show'); return;
+  }
+  document.getElementById('email-error').classList.remove('show');
+  state.email = email;
+  showSection('loading');
+  runLoadingAnimation();
+}
+
+function runLoadingAnimation() {
+  const msgs = [
+    'Analyzing your profile...',
+    'Matching supplement science...',
+    'Calculating optimal doses...',
+    'Selecting top brand picks...',
+    'Assembling your plan...'
+  ];
+  const steps = document.querySelectorAll('.loading-steps li');
+  const msgEl = document.getElementById('loading-msg');
+  let i = 0;
+
+  const interval = setInterval(() => {
+    if (i < steps.length) {
+      steps[i].classList.add('done');
+      steps[i].querySelector('.check').textContent = '✓';
+      msgEl.textContent = msgs[Math.min(i + 1, msgs.length - 1)];
+    }
+    i++;
+    if (i >= steps.length) {
+      clearInterval(interval);
+      setTimeout(() => {
+        // Build and show results
+        state.plan = buildPlan(state);
+        state.activePhase = 'pre';
+        state.animatedPhases.clear();
+        renderResults();
+        showSection('results');
+        // Reset loading steps for next time
+        steps.forEach(s => { s.classList.remove('done'); s.querySelector('.check').textContent = s.dataset.n || ''; });
+      }, 400);
+    }
+  }, 420);
+}
+
+// ──────────────────────────────────────────────
+//  RENDER RESULTS
+// ──────────────────────────────────────────────
+function renderResults() {
+  // Profile chips
+  const chips = [
+    ...state.goals,
+    state.sessionsPerWeek ? `${state.sessionsPerWeek} sessions/week` : null,
+    state.duration || null,
+    ...(state.trainingStyle.length ? state.trainingStyle : []),
+    state.trainingTime ? `${state.trainingTime} training` : null,
+    state.budget ? `Budget: ${state.budget}` : null
+  ].filter(Boolean);
+
+  document.getElementById('profile-summary').innerHTML = chips.map(c => `<span class="profile-chip">${c}</span>`).join('');
+  document.getElementById('results-subtitle').textContent = `Personalized for ${state.email}`;
+
+  switchPhase('pre');
+}
+
+function switchPhase(phase) {
+  state.activePhase = phase;
+  document.querySelectorAll('.phase-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.phase === phase);
+  });
+  renderSupplements(phase);
+}
+
+function renderSupplements(phase) {
+  const list = document.getElementById('supps-list');
+  const supps = state.plan[phase] || [];
+  const alreadyAnimated = state.animatedPhases.has(phase);
+
+  if (supps.length === 0) {
+    list.innerHTML = `<div style="text-align:center;padding:48px;color:var(--text2);">
+      <div style="font-size:40px;margin-bottom:16px;">✓</div>
+      <div style="font-size:16px;font-weight:600;">No supplements needed for this phase</div>
+      <div style="font-size:14px;margin-top:8px;">Based on your profile, focus your budget on the other phases.</div>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = supps.map((s, idx) => buildSuppCard(s, idx)).join('');
+
+  // Animate bars after short delay
+  if (!alreadyAnimated) {
+    state.animatedPhases.add(phase);
+    setTimeout(() => {
+      supps.forEach((s, idx) => {
+        const bar = document.getElementById(`bar-${phase}-${idx}`);
+        if (bar) bar.style.width = s.score + '%';
+      });
+    }, 100);
+  } else {
+    // Set immediately without animation
+    supps.forEach((s, idx) => {
+      const bar = document.getElementById(`bar-${phase}-${idx}`);
+      if (bar) {
+        bar.style.transition = 'none';
+        bar.style.width = s.score + '%';
+      }
+    });
+  }
+
+  // Init carousels
+  supps.forEach((s, idx) => {
+    window[`carousel_${phase}_${idx}`] = 0;
+  });
+}
+
+function buildSuppCard(s, idx) {
+  const phase = state.activePhase;
+  const brands = BRANDS[s.name] || [{ name: 'Various Brands', tagline: 'Quality supplement', abbr: 'SUP' }];
+  const emoji = EMOJIS[s.name] || '💊';
+  const why = getWhyText(s.name, state.goals, state);
+  const dose = getDoseText(s.name, state);
+
+  return `
+  <div class="supp-card" style="animation-delay:${idx * 0.08}s">
+    <div class="supp-header">
+      <div class="supp-name">${s.name}</div>
+      <div class="supp-emoji">${emoji}</div>
+    </div>
+
+    <div class="supp-goal-bar">
+      <div class="bar-label">
+        <span class="bar-label-text">Goal Impact</span>
+        <span class="bar-score">${s.score}/100</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" id="bar-${phase}-${idx}" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="supp-why">${why}</div>
+
+    <div class="supp-dose">
+      <span class="timing-icon">⏱</span>
+      ${dose}
+    </div>
+
+    <div class="brand-carousel">
+      <div class="carousel-label">— EXPLORE OUR CHOICE —</div>
+      <div class="carousel-inner">
+        <button class="carousel-btn" onclick="carouselPrev('${phase}',${idx},${brands.length})">&#8592;</button>
+        <div class="brand-display" id="brand-display-${phase}-${idx}">
+          ${renderBrandSlide(brands[0])}
+        </div>
+        <button class="carousel-btn" onclick="carouselNext('${phase}',${idx},${brands.length})">&#8594;</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderBrandSlide(brand) {
+  return `
+    <div class="brand-img">${brand.abbr}</div>
+    <div class="brand-info">
+      <div class="brand-name">${brand.name}</div>
+      <div class="brand-tagline">${brand.tagline}</div>
+      <a href="#" class="buy-btn" onclick="return false;">BUY THIS PRODUCT</a>
+    </div>`;
+}
+
+function carouselNext(phase, idx, total) {
+  const key = `carousel_${phase}_${idx}`;
+  window[key] = (window[key] + 1) % total;
+  updateCarousel(phase, idx);
+}
+
+function carouselPrev(phase, idx, total) {
+  const key = `carousel_${phase}_${idx}`;
+  window[key] = (window[key] - 1 + total) % total;
+  updateCarousel(phase, idx);
+}
+
+function updateCarousel(phase, idx) {
+  const supp = state.plan[phase][idx];
+  if (!supp) return;
+  const brands = BRANDS[supp.name] || [];
+  const key = `carousel_${phase}_${idx}`;
+  const i = window[key] || 0;
+  const el = document.getElementById(`brand-display-${phase}-${idx}`);
+  if (el && brands[i]) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(8px)';
+    el.style.transition = 'opacity 0.18s, transform 0.18s';
+    setTimeout(() => {
+      el.innerHTML = renderBrandSlide(brands[i]);
+      el.style.opacity = '1';
+      el.style.transform = 'translateX(0)';
+    }, 180);
+  }
+}
+
+// Initialize height unit display
+document.addEventListener('DOMContentLoaded', () => {
+  // Set default step numbers on loading steps
+  document.querySelectorAll('.loading-steps li').forEach((li, i) => {
+    li.dataset.n = i + 1;
+    li.querySelector('.check').textContent = i + 1;
+  });
+});
+</script>
+</body>
+</html>
