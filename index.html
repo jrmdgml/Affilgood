@@ -203,6 +203,21 @@
   /* Goal pills */
   .pills-grid { display: flex; flex-wrap: wrap; gap: 10px; }
 
+  /* Goal cards — big 3-column grid */
+  .goals-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 480px) { .goals-grid { grid-template-columns: repeat(2, 1fr); } }
+  .goal-card {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px; padding: 22px 12px; border-radius: 14px;
+    border: 2px solid var(--border2); background: var(--card2);
+    cursor: pointer; transition: all 0.18s; text-align: center; user-select: none;
+  }
+  .goal-card:hover { border-color: var(--accent1); background: rgba(124,58,237,0.1); }
+  .goal-card.selected { border-color: var(--accent1); background: rgba(124,58,237,0.2); box-shadow: 0 0 0 1px rgba(124,58,237,0.3); }
+  .goal-card .goal-emoji { font-size: 28px; line-height: 1; }
+  .goal-card .goal-label { font-size: 13px; font-weight: 700; color: var(--text2); transition: color 0.18s; }
+  .goal-card.selected .goal-label, .goal-card:hover .goal-label { color: var(--text); }
+
   /* Profile fields */
   .field-group { margin-bottom: 24px; }
   .field-label { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -327,8 +342,6 @@
   .supp-category {
     font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
     padding: 4px 9px; border-radius: 4px; flex-shrink: 0;
-    background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(37,99,235,0.2));
-    border: 1px solid rgba(124,58,237,0.35); color: #a78bfa;
   }
   .supp-goal-bar { margin-bottom: 14px; }
   .bar-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
@@ -515,13 +528,25 @@
     <div class="q-step-label">Step 1 — Your Goal</div>
     <h2>What are you training for?</h2>
     <p class="hint">Select all that apply — your plan will be optimized for each.</p>
-    <div class="pills-grid" id="goals-grid">
-      <div class="chip" data-value="Lose Weight" onclick="toggleGoal(this)">Lose Weight</div>
-      <div class="chip" data-value="Build Muscle" onclick="toggleGoal(this)">Build Muscle</div>
-      <div class="chip" data-value="Endurance" onclick="toggleGoal(this)">Endurance</div>
-      <div class="chip" data-value="Peak Performance" onclick="toggleGoal(this)">Peak Performance</div>
-      <div class="chip" data-value="Body Recomposition" onclick="toggleGoal(this)">Body Recomposition</div>
-      <div class="chip" data-value="General Health" onclick="toggleGoal(this)">General Health</div>
+    <div class="goals-grid" id="goals-grid">
+      <div class="goal-card" data-value="Lose Weight" onclick="toggleGoal(this)">
+        <span class="goal-emoji">🔥</span><span class="goal-label">Lose Weight</span>
+      </div>
+      <div class="goal-card" data-value="Build Muscle" onclick="toggleGoal(this)">
+        <span class="goal-emoji">💪</span><span class="goal-label">Build Muscle</span>
+      </div>
+      <div class="goal-card" data-value="Endurance" onclick="toggleGoal(this)">
+        <span class="goal-emoji">🚴</span><span class="goal-label">Endurance</span>
+      </div>
+      <div class="goal-card" data-value="Peak Performance" onclick="toggleGoal(this)">
+        <span class="goal-emoji">🏆</span><span class="goal-label">Peak Performance</span>
+      </div>
+      <div class="goal-card" data-value="Body Recomposition" onclick="toggleGoal(this)">
+        <span class="goal-emoji">⚖️</span><span class="goal-label">Body Recomposition</span>
+      </div>
+      <div class="goal-card" data-value="General Health" onclick="toggleGoal(this)">
+        <span class="goal-emoji">❤️</span><span class="goal-label">General Health</span>
+      </div>
     </div>
     <div class="error-hint" id="goals-error">Please select at least one goal to continue.</div>
     <div class="q-footer">
@@ -645,12 +670,13 @@
     </div>
 
     <div class="field-group">
-      <div class="field-label">Training Time of Day</div>
-      <div class="toggle-group" id="time-group">
-        <div class="toggle-btn" data-value="Morning" onclick="selectToggle('time-group', this)">Morning</div>
-        <div class="toggle-btn" data-value="Afternoon" onclick="selectToggle('time-group', this)">Afternoon</div>
-        <div class="toggle-btn" data-value="Evening" onclick="selectToggle('time-group', this)">Evening</div>
-        <div class="toggle-btn" data-value="Night" onclick="selectToggle('time-group', this)">Night</div>
+      <div class="field-label">Training Time of Day <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text2);font-size:12px;">(select all that apply)</span></div>
+      <div class="pills-grid" id="time-grid">
+        <div class="chip" data-value="Morning" onclick="toggleTime(this)">Morning</div>
+        <div class="chip" data-value="Afternoon" onclick="toggleTime(this)">Afternoon</div>
+        <div class="chip" data-value="Evening" onclick="toggleTime(this)">Evening</div>
+        <div class="chip" data-value="Night" onclick="toggleTime(this)">Night</div>
+        <div class="chip" data-value="No Preference" onclick="toggleTime(this)">No Preference</div>
       </div>
     </div>
     <div class="error-hint" id="training-error">Please complete all fields to continue.</div>
@@ -660,11 +686,11 @@
     </div>
   </div>
 
-  <!-- STEP 4: Budget & Experience -->
+  <!-- STEP 4: Budget -->
   <div id="step-4" class="q-card hidden">
-    <div class="q-step-label">Step 4 — Budget & Experience</div>
-    <h2>Budget &amp; supplement background</h2>
-    <p class="hint">We'll make sure your plan fits your wallet and experience level.</p>
+    <div class="q-step-label">Step 4 — Your Budget</div>
+    <h2>What's your monthly supplement budget?</h2>
+    <p class="hint">We'll only recommend supplements that fit within your price range.</p>
 
     <div class="field-group">
       <div class="field-label">Monthly Supplement Budget</div>
@@ -688,15 +714,7 @@
       </div>
     </div>
 
-    <div class="field-group">
-      <div class="field-label">Current Supplement Experience</div>
-      <div class="toggle-group" id="exp-group">
-        <div class="toggle-btn" data-value="None" onclick="selectToggle('exp-group', this)">None</div>
-        <div class="toggle-btn" data-value="Basic" onclick="selectToggle('exp-group', this)">Basic</div>
-        <div class="toggle-btn" data-value="Advanced" onclick="selectToggle('exp-group', this)">Advanced</div>
-      </div>
-    </div>
-    <div class="error-hint" id="budget-error">Please select a budget and experience level.</div>
+    <div class="error-hint" id="budget-error">Please select a budget to continue.</div>
     <div class="q-footer">
       <button class="btn btn-ghost" onclick="prevStep(4)">Back</button>
       <button class="btn btn-primary" onclick="nextStep(4)">Continue <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg></button>
@@ -851,8 +869,8 @@ const state = {
   goals: [],
   age: null, sex: null, weightKg: null, heightCm: null, diet: ['None'],
   weightUnit: 'kg', heightUnit: 'cm',
-  fitnessLevel: null, sessionsPerWeek: null, duration: null, trainingStyle: [], trainingTime: null,
-  budget: null, experience: null,
+  fitnessLevel: null, sessionsPerWeek: null, duration: null, trainingStyle: [], trainingTimes: [], trainingTime: null,
+  budget: null,
   email: '',
   plan: { pre: [], during: [], post: [] },
   activePhase: 'pre',
@@ -941,23 +959,23 @@ function nextStep(step) {
     const level = getToggleVal('level-group');
     const sessions = getToggleVal('sessions-group');
     const duration = getToggleVal('duration-group');
-    const time = getToggleVal('time-group');
-    if (!level || !sessions || !duration || !time || state.trainingStyle.length === 0) {
+    if (!level || !sessions || !duration || state.trainingTimes.length === 0 || state.trainingStyle.length === 0) {
       document.getElementById('training-error').classList.add('show'); return;
     }
     document.getElementById('training-error').classList.remove('show');
     state.fitnessLevel = level; state.sessionsPerWeek = sessions;
-    state.duration = duration; state.trainingTime = time;
+    state.duration = duration;
+    // Derive single trainingTime for backward compat (pick first non-"No Preference", or null)
+    const pref = state.trainingTimes.filter(t => t !== 'No Preference');
+    state.trainingTime = pref.length ? pref[0] : null;
     goToStep(4);
 
   } else if (step === 4) {
     const budget = state.budget;
-    const exp = getToggleVal('exp-group');
-    if (!budget || !exp) {
+    if (!budget) {
       document.getElementById('budget-error').classList.add('show'); return;
     }
     document.getElementById('budget-error').classList.remove('show');
-    state.experience = exp;
     goToStep(5);
   }
 }
@@ -1001,6 +1019,28 @@ function toggleStyle(el) {
   else state.trainingStyle.push(val);
 }
 
+function toggleTime(el) {
+  const val = el.dataset.value;
+  if (val === 'No Preference') {
+    // Select only "No Preference", deselect others
+    document.querySelectorAll('#time-grid .chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    state.trainingTimes = ['No Preference'];
+  } else {
+    // Deselect "No Preference" if it was selected
+    const noPref = document.querySelector('#time-grid .chip[data-value="No Preference"]');
+    if (noPref) noPref.classList.remove('selected');
+    state.trainingTimes = state.trainingTimes.filter(t => t !== 'No Preference');
+    // Toggle this value
+    el.classList.toggle('selected');
+    if (state.trainingTimes.includes(val)) {
+      state.trainingTimes = state.trainingTimes.filter(t => t !== val);
+    } else {
+      state.trainingTimes.push(val);
+    }
+  }
+}
+
 function selectToggle(groupId, el) {
   document.querySelectorAll(`#${groupId} .toggle-btn`).forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
@@ -1034,10 +1074,20 @@ function selectBudget(el) {
 //  why-text) lives in database.js
 // ──────────────────────────────────────────────
 
+// Estimated individual monthly cost per supplement (USD)
+const SUPP_PRICES = {
+  'Caffeine': 8, 'Creatine': 20, 'Beta-Alanine': 15, 'L-Citrulline': 25,
+  'Ashwagandha': 18, 'BCAAs': 30, 'Electrolytes': 20, 'Carbohydrates (Fast)': 15,
+  'Whey Protein': 45, 'Plant Protein': 50, 'Omega-3': 20, 'Magnesium': 15, 'ZMA': 20
+};
+// Max individual supplement price allowed per budget tier
+const BUDGET_PRICE_LIMIT = { '<$30': 30, '$30-60': 40, '$60-100': Infinity, '$100+': Infinity };
+
 function buildPlan(data) {
-  const { goals, diet, trainingStyle, trainingTime, duration, sessionsPerWeek, experience, budget, weightKg } = data;
+  const { goals, diet, trainingStyle, trainingTimes, trainingTime, duration, sessionsPerWeek, budget, weightKg } = data;
   const isVegan = diet.includes('Vegan');
-  const isEveningNight = ['Evening','Night'].includes(trainingTime);
+  const times = trainingTimes && trainingTimes.length ? trainingTimes : (trainingTime ? [trainingTime] : []);
+  const isEveningNight = times.some(t => ['Evening','Night'].includes(t)) && !times.includes('No Preference');
   const isLongSession = ['60-90min','90min+'].includes(duration);
   const isHighFreq = ['5-6','7+'].includes(sessionsPerWeek);
 
@@ -1084,16 +1134,20 @@ function buildPlan(data) {
   if (isEveningNight || goals.includes('General Health') || isHighFreq) {
     post.push('Magnesium');
   }
-  if (experience === 'Advanced' && data.sex === 'Male' && isEveningNight) {
+  if (data.sex === 'Male' && isEveningNight) {
     post.push('ZMA');
   }
 
-  // Budget limit
+  // Budget limit (total count)
   const limits = { '<$30': 3, '$30-60': 6, '$60-100': 8, '$100+': 999 };
   const maxTotal = limits[budget] || 999;
 
+  // Per-supplement price filter
+  const priceLimit = BUDGET_PRICE_LIMIT[budget] ?? Infinity;
+  const affordable = s => (SUPP_PRICES[s] ?? 0) <= priceLimit;
+
   // Score all and pick top
-  const scoreAll = arr => arr.map(s => ({ name: s, score: computeScore(s, goals, data) }))
+  const scoreAll = arr => arr.filter(affordable).map(s => ({ name: s, score: computeScore(s, goals, data) }))
                              .sort((a, b) => b.score - a.score);
 
   const allScored = [
@@ -1181,7 +1235,7 @@ function renderResults() {
     state.sessionsPerWeek ? `${state.sessionsPerWeek} sessions/week` : null,
     state.duration || null,
     ...(state.trainingStyle.length ? state.trainingStyle : []),
-    state.trainingTime ? `${state.trainingTime} training` : null,
+    ...(state.trainingTimes.length ? state.trainingTimes.map(t => `${t} training`) : (state.trainingTime ? [`${state.trainingTime} training`] : [])),
     state.budget ? `Budget: ${state.budget}` : null
   ].filter(Boolean);
 
@@ -1235,6 +1289,21 @@ function switchPhase(phase) {
   if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+const CATEGORY_COLORS = {
+  'ENERGY':     { bg: 'rgba(245,158,11,0.18)',  border: 'rgba(245,158,11,0.45)',  text: '#f59e0b' },
+  'MUSCLE':     { bg: 'rgba(239,68,68,0.15)',   border: 'rgba(239,68,68,0.4)',    text: '#f87171' },
+  'ENDURANCE':  { bg: 'rgba(16,185,129,0.15)',  border: 'rgba(16,185,129,0.4)',   text: '#34d399' },
+  'PUMP':       { bg: 'rgba(236,72,153,0.15)',  border: 'rgba(236,72,153,0.4)',   text: '#f472b6' },
+  'ADAPTOGEN':  { bg: 'rgba(132,204,22,0.15)',  border: 'rgba(132,204,22,0.4)',   text: '#a3e635' },
+  'RECOVERY':   { bg: 'rgba(99,102,241,0.18)',  border: 'rgba(99,102,241,0.45)', text: '#818cf8' },
+  'HYDRATION':  { bg: 'rgba(14,165,233,0.15)',  border: 'rgba(14,165,233,0.4)',   text: '#38bdf8' },
+  'FUEL':       { bg: 'rgba(251,146,60,0.15)',  border: 'rgba(251,146,60,0.4)',   text: '#fb923c' },
+  'PROTEIN':    { bg: 'rgba(124,58,237,0.18)',  border: 'rgba(124,58,237,0.45)', text: '#a78bfa' },
+  'HEALTH':     { bg: 'rgba(20,184,166,0.15)',  border: 'rgba(20,184,166,0.4)',   text: '#2dd4bf' },
+  'HORMONE':    { bg: 'rgba(168,85,247,0.15)',  border: 'rgba(168,85,247,0.4)',   text: '#c084fc' },
+  'SUPPLEMENT': { bg: 'rgba(148,163,184,0.15)', border: 'rgba(148,163,184,0.4)', text: '#94a3b8' },
+};
+
 function buildSuppCard(s, idx, phase) {
   const brands = BRANDS[s.name] || [{ name: 'Various Brands', tagline: 'Quality supplement', abbr: 'SUP' }];
   const category = CATEGORIES[s.name] || 'SUPPLEMENT';
@@ -1245,7 +1314,7 @@ function buildSuppCard(s, idx, phase) {
   <div class="supp-card" style="animation-delay:${idx * 0.08}s">
     <div class="supp-header">
       <div class="supp-name">${s.name}</div>
-      <div class="supp-category">${category}</div>
+      <div class="supp-category" style="background:${(CATEGORY_COLORS[category]||CATEGORY_COLORS.SUPPLEMENT).bg};border:1px solid ${(CATEGORY_COLORS[category]||CATEGORY_COLORS.SUPPLEMENT).border};color:${(CATEGORY_COLORS[category]||CATEGORY_COLORS.SUPPLEMENT).text};">${category}</div>
     </div>
 
     <div class="supp-goal-bar">
@@ -1330,7 +1399,7 @@ function openOnePager() {
     state.sessionsPerWeek ? `${state.sessionsPerWeek} sessions/week` : null,
     state.duration || null,
     ...(state.trainingStyle.length ? state.trainingStyle : []),
-    state.trainingTime ? `${state.trainingTime} training` : null,
+    ...(state.trainingTimes.length ? state.trainingTimes.map(t => `${t} training`) : (state.trainingTime ? [`${state.trainingTime} training`] : [])),
     state.budget ? `Budget: ${state.budget}` : null
   ].filter(Boolean).join('  ·  ');
 

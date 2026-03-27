@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SupplAI — Database Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0a0f; --card:#111118; --card2:#16161f; --border:#1e1e2e; --border2:#2a2a3a;
+    --accent1:#7c3aed; --accent2:#2563eb; --text:#f0f0f8; --text2:#9090a8;
+    --success:#10b981; --danger:#ef4444; --warning:#f59e0b; --radius:12px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+
+  .btn { display:inline-flex; align-items:center; gap:7px; padding:9px 18px; border-radius:50px; font-weight:600; font-size:13px; border:none; cursor:pointer; transition:all 0.18s; text-decoration:none; }
+  .btn-primary { background:linear-gradient(135deg,var(--accent1),var(--accent2)); color:#fff; }
+  .btn-primary:hover { opacity:0.88; transform:translateY(-1px); box-shadow:0 6px 20px rgba(124,58,237,0.35); }
+  .btn-ghost { background:transparent; color:var(--text2); border:1.5px solid var(--border2); }
+  .btn-ghost:hover { border-color:var(--accent1); color:var(--text); }
+  .btn-danger { background:rgba(239,68,68,0.12); color:#f87171; border:1px solid rgba(239,68,68,0.25); }
+  .btn-danger:hover { background:rgba(239,68,68,0.22); }
+  .btn-success { background:rgba(16,185,129,0.12); color:#34d399; border:1px solid rgba(16,185,129,0.25); }
+  .btn-success:hover { background:rgba(16,185,129,0.22); }
+
+  /* ── WELCOME SCREEN ── */
+  #welcome {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    flex:1; gap:0; padding:40px 24px;
+  }
+  .welcome-logo { font-size:20px; font-weight:800; background:linear-gradient(135deg,var(--accent1),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:40px; }
+  .welcome-card {
+    background:var(--card); border:1px solid var(--border); border-radius:20px;
+    padding:52px 56px; max-width:560px; width:100%; text-align:center;
+  }
+  .welcome-card h1 { font-size:26px; font-weight:800; letter-spacing:-0.5px; margin-bottom:12px; }
+  .welcome-card p { font-size:15px; color:var(--text2); line-height:1.6; margin-bottom:40px; }
+  .welcome-options { display:flex; flex-direction:column; gap:14px; }
+  .import-option {
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    padding:28px 24px; border-radius:14px; border:2px dashed var(--border2);
+    cursor:pointer; transition:all 0.2s; position:relative;
+  }
+  .import-option:hover { border-color:var(--accent1); background:rgba(124,58,237,0.06); }
+  .import-option input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; }
+  .import-option .io-icon { width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg,var(--accent1),var(--accent2)); display:flex; align-items:center; justify-content:center; }
+  .import-option h3 { font-size:15px; font-weight:700; }
+  .import-option p { font-size:13px; color:var(--text2); margin:0; }
+  .divider { display:flex; align-items:center; gap:12px; color:var(--text2); font-size:13px; }
+  .divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
+  .start-fresh-btn { width:100%; justify-content:center; padding:13px; }
+
+  /* ── APP SHELL ── */
+  #app { display:none; flex-direction:column; flex:1; overflow:hidden; }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display:flex; align-items:center; gap:14px; padding:12px 20px;
+    background:var(--card); border-bottom:1px solid var(--border); flex-shrink:0;
+  }
+  .topbar-logo { font-size:15px; font-weight:800; background:linear-gradient(135deg,var(--accent1),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .topbar-sep { width:1px; height:20px; background:var(--border2); }
+  .topbar-title { font-size:13px; font-weight:500; color:var(--text2); }
+  .unsaved-chip { display:none; align-items:center; gap:6px; font-size:12px; color:var(--warning); background:rgba(245,158,11,0.1); padding:5px 12px; border-radius:50px; border:1px solid rgba(245,158,11,0.25); }
+  .unsaved-chip.show { display:flex; }
+
+  .topbar-right { margin-left:auto; display:flex; align-items:center; gap:10px; }
+
+  /* ── MAIN ── */
+  .main { display:flex; flex:1; overflow:hidden; }
+
+  /* ── SIDEBAR ── */
+  .sidebar { width:230px; flex-shrink:0; background:var(--card); border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; }
+  .sidebar-header { padding:12px 16px; border-bottom:1px solid var(--border); font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; justify-content:space-between; }
+  .sidebar-list { overflow-y:auto; flex:1; padding:6px 0; }
+  .supp-item {
+    display:flex; align-items:center; gap:8px; padding:9px 14px;
+    cursor:pointer; font-size:13px; font-weight:500; color:var(--text2);
+    border-left:3px solid transparent; transition:all 0.15s; user-select:none;
+  }
+  .supp-item:hover { background:var(--card2); color:var(--text); }
+  .supp-item.active { background:rgba(124,58,237,0.12); color:var(--text); border-left-color:var(--accent1); }
+  .supp-item .s-name { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cat-badge { font-size:9px; font-weight:800; letter-spacing:1px; padding:2px 7px; border-radius:3px; flex-shrink:0; }
+  .sidebar-footer { padding:10px 12px; border-top:1px solid var(--border); }
+
+  /* ── EDITOR ── */
+  .editor { flex:1; overflow-y:auto; padding:28px 32px; }
+  .editor-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--text2); text-align:center; gap:12px; opacity:0.5; }
+
+  .editor-header { display:flex; align-items:center; gap:14px; margin-bottom:24px; flex-wrap:wrap; }
+  .editor-title { font-size:20px; font-weight:800; letter-spacing:-0.3px; }
+  .cat-select { background:var(--card2); border:1.5px solid var(--border2); color:var(--text); font-size:13px; font-weight:600; padding:7px 12px; border-radius:8px; outline:none; font-family:'Inter',sans-serif; cursor:pointer; }
+  .cat-select:focus { border-color:var(--accent1); }
+  .cat-label { font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px; }
+
+  /* ── TABLE ── */
+  .brands-wrap { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:16px; }
+  .brands-table { width:100%; border-collapse:collapse; }
+  .brands-table thead tr { background:var(--card2); }
+  .brands-table th { padding:10px 12px; text-align:left; font-size:10px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px; }
+  .brands-table tbody tr { border-top:1px solid var(--border); transition:background 0.12s; }
+  .brands-table tbody tr:hover { background:rgba(255,255,255,0.015); }
+  .brands-table td { padding:8px 10px; vertical-align:middle; }
+  .cell-input {
+    background:transparent; border:1.5px solid transparent; color:var(--text);
+    font-size:13px; font-family:'Inter',sans-serif; padding:5px 9px; border-radius:6px;
+    outline:none; width:100%; transition:border-color 0.15s;
+  }
+  .cell-input:focus { border-color:var(--accent1); background:var(--card2); }
+  .url-input { font-size:12px; color:#60a5fa; }
+  .drag-handle { cursor:grab; color:var(--text2); opacity:0.35; font-size:16px; user-select:none; padding:0 4px; }
+  .drag-handle:hover { opacity:1; }
+  .row-drag-over { border-top:2px solid var(--accent1) !important; }
+
+  /* ── EXPORT CTA ── */
+  .export-bar {
+    background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(37,99,235,0.15));
+    border:1px solid rgba(124,58,237,0.3); border-radius:14px;
+    padding:24px 28px; display:flex; align-items:center; gap:20px; margin-bottom:32px; flex-wrap:wrap;
+  }
+  .export-bar-text h3 { font-size:15px; font-weight:700; margin-bottom:4px; }
+  .export-bar-text p { font-size:13px; color:var(--text2); }
+  .export-bar .btn-export { padding:13px 28px; font-size:14px; margin-left:auto; }
+
+  /* ── MODAL ── */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); z-index:200; align-items:center; justify-content:center; }
+  .modal-overlay.show { display:flex; }
+  .modal { background:var(--card); border:1px solid var(--border2); border-radius:var(--radius); padding:28px; width:420px; max-width:92vw; }
+  .modal h3 { font-size:16px; font-weight:700; margin-bottom:20px; }
+  .form-group { margin-bottom:16px; }
+  .form-label { font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:7px; display:block; }
+  .form-input { width:100%; background:var(--card2); border:1.5px solid var(--border2); color:var(--text); font-size:14px; font-family:'Inter',sans-serif; padding:10px 14px; border-radius:8px; outline:none; transition:border-color 0.15s; }
+  .form-input:focus { border-color:var(--accent1); }
+  .modal-footer { display:flex; gap:10px; justify-content:flex-end; margin-top:22px; }
+
+  ::-webkit-scrollbar { width:5px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:99px; }
+</style>
+</head>
+<body>
+
+<!-- ══ WELCOME SCREEN ══ -->
+<div id="welcome">
+  <div class="welcome-logo">SupplAI</div>
+  <div class="welcome-card">
+    <h1>Database Editor</h1>
+    <p>Import your existing <code style="background:var(--card2);padding:2px 7px;border-radius:4px;font-size:13px;">database.js</code> to start editing, or begin from the default data.</p>
+    <div class="welcome-options">
+      <label class="import-option">
+        <input type="file" accept=".js,.json" id="welcome-import-input" onchange="handleWelcomeImport(this)">
+        <div class="io-icon">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+        </div>
+        <h3>Import database.js</h3>
+        <p>Click or drag your file here to load existing data</p>
+      </label>
+      <div style="font-size:12px;color:var(--text2);background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:12px 16px;text-align:left;line-height:1.6;">
+        <strong style="color:var(--text);">Where to find it:</strong> your <code style="background:rgba(255,255,255,0.07);padding:1px 5px;border-radius:3px;">database.js</code> file is located in your project folder alongside <code style="background:rgba(255,255,255,0.07);padding:1px 5px;border-radius:3px;">index.html</code>. Import it here, make your edits, then export it back to the same location with the same name to apply your changes.
+      </div>
+      <div class="divider">or</div>
+      <button class="btn btn-ghost start-fresh-btn" onclick="startFresh()">
+        Start from default data
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <span class="topbar-logo">SupplAI</span>
+    <div class="topbar-sep"></div>
+    <span class="topbar-title">Database Editor</span>
+    <div class="unsaved-chip" id="unsaved-chip">
+      <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 8v4m0 4h.01"/></svg>
+      Unsaved changes
+    </div>
+    <div class="topbar-right">
+      <label class="btn btn-ghost" style="cursor:pointer;font-size:12px;padding:7px 14px;">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+        Import
+        <input type="file" accept=".js,.json" style="display:none" id="topbar-import-input" onchange="handleTopbarImport(this)">
+      </label>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <span>Supplements</span>
+        <span id="supp-count" style="font-size:11px;color:var(--text2);font-weight:500;text-transform:none;letter-spacing:0;"></span>
+      </div>
+      <div class="sidebar-list" id="sidebar-list"></div>
+      <div class="sidebar-footer">
+        <button class="btn btn-ghost" style="width:100%;justify-content:center;font-size:12px;padding:8px;" onclick="showAddModal()">+ Add Supplement</button>
+      </div>
+    </div>
+
+    <!-- EDITOR -->
+    <div class="editor" id="editor">
+      <div class="editor-empty">
+        <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <div style="font-size:14px;font-weight:600;">Select a supplement from the sidebar</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD SUPPLEMENT MODAL -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Add New Supplement</h3>
+    <div class="form-group">
+      <label class="form-label">Name</label>
+      <input class="form-input" id="new-name" placeholder="e.g. L-Glutamine">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <select class="form-input" id="new-cat">
+        <option>ENERGY</option><option>MUSCLE</option><option>ENDURANCE</option>
+        <option>PUMP</option><option>ADAPTOGEN</option><option>RECOVERY</option>
+        <option>HYDRATION</option><option>FUEL</option><option>PROTEIN</option>
+        <option>HEALTH</option><option>HORMONE</option><option>SUPPLEMENT</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmAddSupp()">Add</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+let db = { CATEGORIES: {}, BRANDS: {} };
+let activeSupp = null;
+let unsaved = false;
+let dragIdx = null;
+
+const CAT_COLORS = {
+  ENERGY:'#f59e0b', MUSCLE:'#f87171', ENDURANCE:'#34d399', PUMP:'#f472b6',
+  ADAPTOGEN:'#a3e635', RECOVERY:'#818cf8', HYDRATION:'#38bdf8', FUEL:'#fb923c',
+  PROTEIN:'#a78bfa', HEALTH:'#2dd4bf', HORMONE:'#c084fc', SUPPLEMENT:'#94a3b8'
+};
+const ALL_CATS = Object.keys(CAT_COLORS);
+
+// ─────────────────────────────────────────────
+//  DEFAULT DATA
+// ─────────────────────────────────────────────
+function getDefaults() {
+  return {
+    CATEGORIES: {
+      'Caffeine':'ENERGY','Creatine':'MUSCLE','Beta-Alanine':'ENDURANCE',
+      'L-Citrulline':'PUMP','Ashwagandha':'ADAPTOGEN','BCAAs':'RECOVERY',
+      'Electrolytes':'HYDRATION','Carbohydrates (Fast)':'FUEL',
+      'Whey Protein':'PROTEIN','Plant Protein':'PROTEIN',
+      'Omega-3':'HEALTH','Magnesium':'RECOVERY','ZMA':'HORMONE'
+    },
+    BRANDS: {
+      'Whey Protein':[
+        {name:'Optimum Nutrition',tagline:'Gold Standard quality since 1986',abbr:'ON',url:'#'},
+        {name:'Myprotein',tagline:"Europe's #1 sports nutrition brand",abbr:'MP',url:'#'},
+        {name:'Dymatize',tagline:'Precision nutrition for elite athletes',abbr:'DY',url:'#'},
+        {name:'BSN',tagline:'Finish First — always',abbr:'BSN',url:'#'}
+      ],
+      'Plant Protein':[
+        {name:'Garden of Life',tagline:'Certified organic, whole-food protein',abbr:'GOL',url:'#'},
+        {name:'Vega',tagline:'Plant-based fuel for every body',abbr:'VEG',url:'#'},
+        {name:'Myprotein',tagline:"Europe's #1 sports nutrition brand",abbr:'MP',url:'#'},
+        {name:'Bulk',tagline:'No nonsense. Just gains.',abbr:'BLK',url:'#'}
+      ],
+      'Creatine':[
+        {name:'Optimum Nutrition',tagline:'The gold standard in creatine monohydrate',abbr:'ON',url:'#'},
+        {name:'Myprotein',tagline:'Pure creatine, unbeatable value',abbr:'MP',url:'#'},
+        {name:'Bulk',tagline:'Lab-tested, no fluff, full dose',abbr:'BLK',url:'#'},
+        {name:'Nutricost',tagline:'Effective. Simple. Affordable.',abbr:'NTC',url:'#'}
+      ],
+      'Caffeine':[
+        {name:'Bulk',tagline:'Clean caffeine, pharmaceutical grade',abbr:'BLK',url:'#'},
+        {name:'Nutricost',tagline:'No frills, full focus',abbr:'NTC',url:'#'},
+        {name:'NOW Foods',tagline:'Trusted natural supplements since 1968',abbr:'NOW',url:'#'},
+        {name:'GNC',tagline:'Live well with GNC',abbr:'GNC',url:'#'}
+      ],
+      'Beta-Alanine':[
+        {name:'NOW Foods',tagline:'Sports-tested CarnoSyn beta-alanine',abbr:'NOW',url:'#'},
+        {name:'Bulk',tagline:'Pure CarnoSyn, full clinical dose',abbr:'BLK',url:'#'},
+        {name:'Nutricost',tagline:'Science-backed endurance support',abbr:'NTC',url:'#'},
+        {name:'Cellucor',tagline:'Feel the tingle. Feel the gains.',abbr:'CEL',url:'#'}
+      ],
+      'BCAAs':[
+        {name:'Myprotein',tagline:'Instantized 2:1:1 BCAA ratio',abbr:'MP',url:'#'},
+        {name:'Optimum Nutrition',tagline:'Gold Standard amino acids',abbr:'ON',url:'#'},
+        {name:'Scivation',tagline:"Xtend — the world's #1 BCAA brand",abbr:'SCI',url:'#'},
+        {name:'BSN',tagline:'Amino X — advanced amino formula',abbr:'BSN',url:'#'}
+      ],
+      'Electrolytes':[
+        {name:'Liquid I.V.',tagline:'Hydration multiplier technology',abbr:'LIV',url:'#'},
+        {name:'LMNT',tagline:'No sugar. Just sodium, potassium, magnesium.',abbr:'LMT',url:'#'},
+        {name:'Nuun',tagline:'Clean hydration for every athlete',abbr:'NUN',url:'#'},
+        {name:'GNC',tagline:'Performance hydration you can trust',abbr:'GNC',url:'#'}
+      ],
+      'Omega-3':[
+        {name:'Nordic Naturals',tagline:"The world's #1 omega-3 brand",abbr:'NN',url:'#'},
+        {name:'NOW Foods',tagline:'Ultra-concentrated EPA+DHA',abbr:'NOW',url:'#'},
+        {name:'Thorne',tagline:'Pharmaceutical-grade fish oil',abbr:'THR',url:'#'},
+        {name:'Garden of Life',tagline:'Certified sustainable, molecularly distilled',abbr:'GOL',url:'#'}
+      ],
+      'Magnesium':[
+        {name:'Thorne',tagline:'Bisglycinate form for maximum absorption',abbr:'THR',url:'#'},
+        {name:'NOW Foods',tagline:'Full-spectrum magnesium support',abbr:'NOW',url:'#'},
+        {name:'Life Extension',tagline:'Clinically studied magnesium L-threonate',abbr:'LE',url:'#'},
+        {name:'Garden of Life',tagline:'Whole-food organic magnesium blend',abbr:'GOL',url:'#'}
+      ],
+      'L-Citrulline':[
+        {name:'Transparent Labs',tagline:'Clinical doses. Zero proprietary blends.',abbr:'TL',url:'#'},
+        {name:'Bulk',tagline:'Fermented, ultra-pure L-Citrulline',abbr:'BLK',url:'#'},
+        {name:'NOW Foods',tagline:'Pharmaceutical grade amino acid',abbr:'NOW',url:'#'},
+        {name:'Nutricost',tagline:'Pure citrulline at an honest price',abbr:'NTC',url:'#'}
+      ],
+      'Ashwagandha':[
+        {name:'KSM-66',tagline:'The most clinically studied ashwagandha extract',abbr:'KSM',url:'#'},
+        {name:'NOW Foods',tagline:'Full-spectrum Sensoril ashwagandha',abbr:'NOW',url:'#'},
+        {name:'Thorne',tagline:'Pharma-grade adaptogen for stress and strength',abbr:'THR',url:'#'},
+        {name:'Garden of Life',tagline:'Organic certified whole root powder',abbr:'GOL',url:'#'}
+      ],
+      'ZMA':[
+        {name:'NOW Foods',tagline:'Original ZMA zinc, magnesium & B6 formula',abbr:'NOW',url:'#'},
+        {name:'Optimum Nutrition',tagline:'Recovery and hormone support blend',abbr:'ON',url:'#'},
+        {name:'Bulk',tagline:'High-strength ZMA at great value',abbr:'BLK',url:'#'},
+        {name:'GNC',tagline:'Proven sleep and testosterone formula',abbr:'GNC',url:'#'}
+      ],
+      'Carbohydrates (Fast)':[
+        {name:'Maurten',tagline:'The fuel of world champions',abbr:'MAU',url:'#'},
+        {name:'SIS',tagline:'Science in Sport — lab-tested carbs',abbr:'SIS',url:'#'},
+        {name:'GU Energy',tagline:'Engineered for performance since 1993',abbr:'GU',url:'#'},
+        {name:'Myprotein',tagline:'Pure waxy maize starch for endurance',abbr:'MP',url:'#'}
+      ]
+    }
+  };
+}
+
+// ─────────────────────────────────────────────
+//  WELCOME SCREEN
+// ─────────────────────────────────────────────
+function handleWelcomeImport(input) {
+  const file = input.files[0];
+  if (!file) return;
+  readAndParse(file, () => {
+    launchApp();
+    showToast('Imported ' + file.name);
+  });
+  input.value = '';
+}
+
+function startFresh() {
+  const d = getDefaults();
+  db.CATEGORIES = d.CATEGORIES;
+  db.BRANDS = d.BRANDS;
+  launchApp();
+}
+
+function launchApp() {
+  document.getElementById('welcome').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  renderSidebar();
+  const first = Object.keys(db.BRANDS)[0];
+  if (first) selectSupp(first);
+  markUnsaved(false);
+}
+
+// ─────────────────────────────────────────────
+//  IMPORT (top bar)
+// ─────────────────────────────────────────────
+function handleTopbarImport(input) {
+  const file = input.files[0];
+  if (!file) return;
+  readAndParse(file, () => {
+    renderSidebar();
+    const first = Object.keys(db.BRANDS)[0];
+    if (first) selectSupp(first);
+    markUnsaved(false);
+    showToast('Imported ' + file.name);
+  });
+  input.value = '';
+}
+
+function readAndParse(file, onSuccess) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const text = e.target.result;
+      // Store the raw text so we can preserve non-editable functions on export
+      db._rawSource = text;
+      const fn = new Function(`
+        ${text}
+        return {
+          BRANDS: typeof BRANDS !== 'undefined' ? BRANDS : null,
+          CATEGORIES: typeof CATEGORIES !== 'undefined' ? CATEGORIES : null
+        };
+      `);
+      const result = fn();
+      if (!result.BRANDS || !result.CATEGORIES) throw new Error('Could not find BRANDS or CATEGORIES.');
+      db.BRANDS = JSON.parse(JSON.stringify(result.BRANDS));
+      db.CATEGORIES = JSON.parse(JSON.stringify(result.CATEGORIES));
+      Object.keys(db.BRANDS).forEach(s => { if (!db.CATEGORIES[s]) db.CATEGORIES[s] = 'SUPPLEMENT'; });
+      onSuccess();
+    } catch (err) {
+      alert('Import failed: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ─────────────────────────────────────────────
+//  EXPORT — uses File System Access API when available
+// ─────────────────────────────────────────────
+async function exportFile() {
+  syncActiveEditor();
+
+  const catsStr = 'const CATEGORIES = ' + JSON.stringify(db.CATEGORIES, null, 2)
+    .replace(/"([^"]+)":/g, "  '$1':")
+    .replace(/: "([^"]+)"/g, ": '$1'")
+    .replace(/^{/, '{')
+    .replace(/}$/, '};');
+
+  const brandsEntries = Object.entries(db.BRANDS).map(([supp, brands]) => {
+    const rows = brands.map(b =>
+      `    { name: ${JSON.stringify(b.name)}, tagline: ${JSON.stringify(b.tagline)}, abbr: ${JSON.stringify(b.abbr)}, url: ${JSON.stringify(b.url || '#')} }`
+    ).join(',\n');
+    return `  ${JSON.stringify(supp)}: [\n${rows}\n  ]`;
+  }).join(',\n');
+  const brandsStr = `const BRANDS = {\n${brandsEntries}\n};`;
+
+  // Functions are always hardcoded — they are never editable via the UI
+  // and must always be present for index.html to work.
+  const functionsSection = `
+// ──────────────────────────────────────────────
+//  GOAL IMPACT SCORES
+// ──────────────────────────────────────────────
+function computeScore(supp, goals, data) {
+  const g = goals;
+  const scores = {
+    'Caffeine':             g.includes('Peak Performance') || g.includes('Endurance') ? 95 : g.includes('Build Muscle') ? 85 : 75,
+    'Creatine':             g.includes('Build Muscle') ? 98 : g.includes('Peak Performance') ? 90 : g.includes('Body Recomposition') ? 88 : 80,
+    'Beta-Alanine':         g.includes('Endurance') ? 92 : data.trainingStyle.includes('HIIT') ? 90 : g.includes('Build Muscle') ? 80 : 75,
+    'L-Citrulline':         g.includes('Peak Performance') ? 92 : g.includes('Build Muscle') ? 88 : g.includes('Endurance') ? 85 : 78,
+    'Ashwagandha':          g.includes('General Health') ? 85 : g.includes('Lose Weight') ? 78 : 72,
+    'BCAAs':                g.includes('Endurance') ? 88 : g.includes('Build Muscle') ? 82 : 78,
+    'Electrolytes':         data.trainingStyle.includes('Cycling') ? 92 : g.includes('Endurance') ? 90 : data.trainingStyle.includes('HIIT') ? 88 : 78,
+    'Carbohydrates (Fast)': g.includes('Endurance') ? 95 : data.trainingStyle.includes('Cycling') ? 92 : 78,
+    'Whey Protein':         g.includes('Build Muscle') ? 98 : g.includes('Body Recomposition') ? 92 : g.includes('Lose Weight') ? 85 : 80,
+    'Plant Protein':        g.includes('Build Muscle') ? 98 : g.includes('Body Recomposition') ? 92 : g.includes('Lose Weight') ? 85 : 80,
+    'Omega-3':              g.includes('General Health') ? 88 : g.includes('Lose Weight') ? 82 : 75,
+    'Magnesium':            ['Evening','Night'].includes(data.trainingTime) ? 90 : g.includes('General Health') ? 85 : 78,
+    'ZMA':                  g.includes('Build Muscle') ? 82 : g.includes('Peak Performance') ? 80 : 75
+  };
+  return scores[supp] || 75;
+}
+
+// ──────────────────────────────────────────────
+//  WHY TEXT
+// ──────────────────────────────────────────────
+function getWhyText(supp, goals, data) {
+  const texts = {
+    'Caffeine': \`Caffeine directly enhances focus, reaction time, and power output — key factors for your \${goals[0]} goal. By blocking adenosine receptors it reduces perceived effort, letting you push harder and longer in every session.\`,
+    'Creatine': goals.includes('Build Muscle')
+      ? \`Creatine saturates your muscle cells with phosphocreatine, directly boosting your strength output and enabling the progressive overload needed to build muscle mass.\`
+      : \`Creatine replenishes ATP stores rapidly, translating to more reps, more power, and better performance — precisely what your \${goals[0]} goal demands.\`,
+    'Beta-Alanine': goals.includes('Endurance')
+      ? \`Beta-alanine buffers lactic acid buildup in muscle tissue, extending your time to fatigue — the critical limiting factor in endurance training.\`
+      : \`Beta-alanine increases muscle carnosine levels, delaying the burn during high-intensity intervals and helping you sustain peak output across more sets.\`,
+    'L-Citrulline': goals.includes('Build Muscle')
+      ? \`L-Citrulline drives nitric oxide production for exceptional muscle pumps and increased blood flow to working muscles, directly enhancing nutrient delivery for muscle growth.\`
+      : \`L-Citrulline amplifies nitric oxide synthesis, reducing fatigue and improving aerobic efficiency — critical for your \${goals[0]} goal.\`,
+    'Ashwagandha': goals.includes('General Health')
+      ? \`Ashwagandha (KSM-66) reduces cortisol by up to 28%, improves sleep quality, and supports healthy testosterone levels — foundational pillars of overall health and recovery.\`
+      : \`Ashwagandha blunts cortisol spikes after \${data.trainingTime?.toLowerCase() || 'evening'} training, promoting deeper sleep and faster recovery while supporting body composition goals.\`,
+    'BCAAs': goals.includes('Build Muscle')
+      ? \`BCAAs (especially leucine) directly trigger muscle protein synthesis. Taking them during long sessions prevents muscle catabolism and primes your body for growth.\`
+      : \`BCAAs reduce exercise-induced muscle damage and mental fatigue during sessions exceeding 60 minutes, helping you maintain form and intensity throughout.\`,
+    'Electrolytes': data.trainingStyle.includes('HIIT') || goals.includes('Endurance')
+      ? \`High-intensity and endurance training causes significant electrolyte losses through sweat. Replenishing sodium, potassium, and magnesium during exercise maintains power output and prevents cramping.\`
+      : \`Even moderate sweat losses impair performance by 2–3%. Electrolytes maintain fluid balance and nerve conduction, keeping you sharp and powerful throughout your session.\`,
+    'Carbohydrates (Fast)': goals.includes('Endurance')
+      ? \`Fast-acting carbohydrates are the primary fuel for endurance work. Consuming 30–60 g per hour prevents glycogen depletion — the primary cause of hitting the wall in endurance events.\`
+      : \`During long sessions, fast carbs maintain blood glucose and muscle glycogen, preserving performance quality and preventing premature fatigue.\`,
+    'Whey Protein': goals.includes('Build Muscle')
+      ? \`Whey protein delivers a rapid spike of leucine — the master trigger for muscle protein synthesis. Its fast absorption makes it ideal post-workout when your muscles are primed for growth.\`
+      : goals.includes('Lose Weight')
+      ? \`Whey protein is the most satiety-inducing macronutrient per calorie. Post-workout consumption preserves lean muscle during a deficit, ensuring you lose fat, not muscle.\`
+      : \`Whey protein provides all essential amino acids in optimal ratios, accelerating muscle repair after training and supporting your body composition goals.\`,
+    'Plant Protein': \`Plant protein delivers a complete amino acid profile from whole-food sources, supporting muscle repair and recovery without animal products — perfectly aligned with your dietary choices and \${goals[0]} goal.\`,
+    'Omega-3': goals.includes('General Health')
+      ? \`Omega-3 EPA+DHA are the most well-researched supplements for cardiovascular health, inflammation reduction, and cognitive function — three pillars of long-term wellbeing.\`
+      : \`Omega-3 reduces exercise-induced inflammation and muscle soreness, accelerating recovery between sessions and supporting your \${goals[0]} journey.\`,
+    'Magnesium': ['Evening','Night'].includes(data.trainingTime)
+      ? \`Evening training elevates cortisol at a time when it should be declining. Magnesium glycinate rebalances this, improving sleep quality, reducing overnight muscle tension, and enhancing recovery.\`
+      : \`Magnesium is depleted by intense training and is a cofactor in over 300 enzymatic reactions including ATP production, protein synthesis, and muscle relaxation — critical for \${goals[0]}.\`,
+    'ZMA': \`ZMA's synergistic combination of zinc, magnesium, and B6 supports testosterone and IGF-1 levels during sleep — the optimal hormonal window for muscle repair and growth during your \${goals[0]} phase.\`
+  };
+  return texts[supp] || \`\${supp} is a well-researched supplement that directly supports your \${goals.join(', ')} goals through its evidence-based mechanisms.\`;
+}
+
+// ──────────────────────────────────────────────
+//  DOSE DATA
+// ──────────────────────────────────────────────
+function getDoseData(supp, data) {
+  const weight = data.weightKg || 75;
+  const table = {
+    'Caffeine':             { dose: weight < 70 ? '150 mg' : '200 mg', when: '30–45 min before workout', frequency: 'Per session (max 1×/day)' },
+    'Creatine':             { dose: '5 g',          when: 'Any time — consistency matters most', frequency: 'Daily (loading not required)' },
+    'Beta-Alanine':         { dose: '3.2 g',        when: '30 min before workout', frequency: 'Daily (tingling is normal)' },
+    'L-Citrulline':         { dose: '6–8 g',        when: '30–45 min before workout', frequency: 'Per session' },
+    'Ashwagandha':          { dose: '600 mg',        when: ['Evening','Night'].includes(data.trainingTime) ? '30–60 min before workout (close to sleep — ideal)' : '30–60 min before workout, with food', frequency: 'Daily' },
+    'BCAAs':                { dose: '10 g',          when: 'Sip throughout your session', frequency: 'Per session (>45 min)' },
+    'Electrolytes':         { dose: '1 serving',     when: 'Mix in water — drink during workout', frequency: 'Per session' },
+    'Carbohydrates (Fast)': { dose: '30–60 g/hour', when: 'Consume continuously during activity', frequency: 'Per session (>60 min)' },
+    'Whey Protein':         { dose: '25–30 g',       when: 'Within 30 min post-workout', frequency: 'Per session' },
+    'Plant Protein':        { dose: '25–30 g',       when: 'Within 30 min post-workout', frequency: 'Per session' },
+    'Omega-3':              { dose: '1–2 g EPA+DHA', when: 'With a fatty meal', frequency: 'Daily' },
+    'Magnesium':            { dose: '300–400 mg',    when: '30–60 min before bed', frequency: 'Daily' },
+    'ZMA':                  { dose: '1 serving',     when: 'On empty stomach, 30–60 min before bed', frequency: 'Daily' }
+  };
+  return table[supp] || { dose: '1 serving', when: 'As directed', frequency: 'Daily' };
+}`;
+
+  const output = `// ══════════════════════════════════════════════════════════════════
+//  SUPPL AI — DATABASE
+//  Edit this file to add/update supplements, brands, scores & copy.
+//  Last exported: ${new Date().toLocaleString()}
+// ══════════════════════════════════════════════════════════════════
+
+// ──────────────────────────────────────────────
+//  SUPPLEMENT CATEGORIES (displayed on cards)
+// ──────────────────────────────────────────────
+${catsStr}
+
+// ──────────────────────────────────────────────
+//  BRAND DATABASE
+//  Fields: name, tagline, abbr, url (affiliate link)
+// ──────────────────────────────────────────────
+${brandsStr}
+${functionsSection}`;
+
+  const blob = new Blob([output], { type: 'text/javascript' });
+
+  // Try File System Access API (Chrome/Edge — lets user pick save location)
+  if (window.showSaveFilePicker) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: 'database.js',
+        types: [{ description: 'JavaScript file', accept: { 'text/javascript': ['.js'] } }]
+      });
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      markUnsaved(false);
+      showToast('Saved successfully');
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') return; // user cancelled
+    }
+  }
+
+  // Fallback — standard download
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'database.js';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  markUnsaved(false);
+  showToast('Exported database.js');
+}
+
+// ─────────────────────────────────────────────
+//  SIDEBAR
+// ─────────────────────────────────────────────
+function renderSidebar() {
+  const list = document.getElementById('sidebar-list');
+  const supps = Object.keys(db.BRANDS);
+  document.getElementById('supp-count').textContent = supps.length;
+
+  list.innerHTML = supps.map(supp => {
+    const cat = db.CATEGORIES[supp] || 'SUPPLEMENT';
+    const color = CAT_COLORS[cat] || '#94a3b8';
+    const active = activeSupp === supp;
+    return `<div class="supp-item${active ? ' active' : ''}" data-supp="${esc(supp)}">
+      <span class="s-name">${esc(supp)}</span>
+      <span class="cat-badge" style="background:${color}22;color:${color};border:1px solid ${color}44;">${cat}</span>
+    </div>`;
+  }).join('');
+
+  // Event delegation — no inline onclick, no quoting issues
+  list.onclick = e => {
+    const item = e.target.closest('.supp-item');
+    if (item) selectSupp(item.dataset.supp);
+  };
+}
+
+// ─────────────────────────────────────────────
+//  EDITOR
+// ─────────────────────────────────────────────
+function selectSupp(supp) {
+  syncActiveEditor();
+  activeSupp = supp;
+  renderSidebar();
+  renderEditor(supp);
+}
+
+function renderEditor(supp) {
+  const brands = db.BRANDS[supp] || [];
+  const cat = db.CATEGORIES[supp] || 'SUPPLEMENT';
+
+  const catOptions = ALL_CATS.map(c =>
+    `<option value="${c}"${c === cat ? ' selected' : ''}>${c}</option>`
+  ).join('');
+
+  const rows = brands.map((b, i) => `
+    <tr draggable="true" data-idx="${i}">
+      <td><span class="drag-handle">⠿</span></td>
+      <td><input class="cell-input" data-field="name" data-idx="${i}" value="${esc(b.name)}" placeholder="Brand name"></td>
+      <td><input class="cell-input" data-field="tagline" data-idx="${i}" value="${esc(b.tagline)}" placeholder="Short tagline"></td>
+      <td><input class="cell-input" data-field="abbr" data-idx="${i}" value="${esc(b.abbr)}" placeholder="ON" style="max-width:70px;"></td>
+      <td><input class="cell-input url-input" data-field="url" data-idx="${i}" value="${esc(b.url||'#')}" placeholder="https://..."></td>
+      <td><button class="btn btn-danger" style="padding:4px 10px;font-size:11px;" data-remove="${i}">✕</button></td>
+    </tr>`).join('');
+
+  const editorEl = document.getElementById('editor');
+  editorEl.innerHTML = `
+    <!-- EXPORT CTA -->
+    <div class="export-bar">
+      <div class="export-bar-text">
+        <h3>Ready to save your changes?</h3>
+        <p>Export <code style="background:rgba(255,255,255,0.08);padding:1px 6px;border-radius:4px;font-size:12px;">database.js</code> and replace the existing file in your project folder.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;margin-left:auto;">
+        <button class="btn btn-primary btn-export" onclick="exportFile()">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Export database.js
+        </button>
+        <span style="font-size:11px;color:var(--text2);text-align:right;">Save as <strong style="color:var(--text);">database.js</strong> in the same folder as <strong style="color:var(--text);">index.html</strong>, replacing the existing file.</span>
+      </div>
+    </div>
+
+    <div class="editor-header">
+      <div class="editor-title">${esc(supp)}</div>
+      <span class="cat-label">Category</span>
+      <select class="cat-select" id="cat-select" onchange="changeCategory(this.value)">${catOptions}</select>
+      <button class="btn btn-danger" style="padding:7px 12px;font-size:12px;margin-left:auto;" id="delete-supp-btn">Delete supplement</button>
+    </div>
+
+    <div class="brands-wrap">
+      <table class="brands-table">
+        <thead>
+          <tr>
+            <th style="width:28px;"></th>
+            <th style="width:21%;">Brand Name</th>
+            <th>Tagline</th>
+            <th style="width:80px;">Abbr</th>
+            <th style="width:25%;">Affiliate URL</th>
+            <th style="width:44px;"></th>
+          </tr>
+        </thead>
+        <tbody id="brands-tbody">${rows}</tbody>
+      </table>
+      <div style="padding:10px 14px;">
+        <button class="btn btn-ghost" style="font-size:12px;padding:7px 14px;" id="add-brand-btn">+ Add Brand</button>
+      </div>
+    </div>`;
+
+  // Attach all events via delegation — no inline onclick in dynamic HTML
+  editorEl.querySelector('#brands-tbody').addEventListener('input', () => markUnsaved(true));
+
+  editorEl.querySelector('#add-brand-btn').addEventListener('click', () => {
+    syncActiveEditor();
+    db.BRANDS[activeSupp].push({ name: '', tagline: '', abbr: '', url: '#' });
+    renderEditor(activeSupp);
+    markUnsaved(true);
+    const inputs = document.querySelectorAll('#brands-tbody input[data-field="name"]');
+    if (inputs.length) inputs[inputs.length - 1].focus();
+  });
+
+  editorEl.querySelector('#delete-supp-btn').addEventListener('click', () => {
+    if (!confirm(`Delete "${activeSupp}" and all its brands?`)) return;
+    delete db.BRANDS[activeSupp];
+    delete db.CATEGORIES[activeSupp];
+    activeSupp = null;
+    renderSidebar();
+    document.getElementById('editor').innerHTML = `<div class="editor-empty"><svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><div style="font-size:14px;font-weight:600;">Select a supplement from the sidebar</div></div>`;
+    markUnsaved(true);
+  });
+
+  editorEl.querySelector('#brands-tbody').addEventListener('click', e => {
+    const btn = e.target.closest('[data-remove]');
+    if (!btn) return;
+    syncActiveEditor();
+    db.BRANDS[activeSupp].splice(parseInt(btn.dataset.remove), 1);
+    renderEditor(activeSupp);
+    markUnsaved(true);
+  });
+
+  // Drag-to-reorder
+  const tbody = editorEl.querySelector('#brands-tbody');
+  tbody.addEventListener('dragstart', e => {
+    const tr = e.target.closest('tr');
+    if (tr) dragIdx = parseInt(tr.dataset.idx);
+  });
+  tbody.addEventListener('dragover', e => {
+    e.preventDefault();
+    const tr = e.target.closest('tr');
+    tbody.querySelectorAll('tr').forEach(r => r.classList.remove('row-drag-over'));
+    if (tr) tr.classList.add('row-drag-over');
+  });
+  tbody.addEventListener('drop', e => {
+    e.preventDefault();
+    const tr = e.target.closest('tr');
+    if (!tr || dragIdx === null) return;
+    const toIdx = parseInt(tr.dataset.idx);
+    if (dragIdx === toIdx) return;
+    syncActiveEditor();
+    const [moved] = db.BRANDS[activeSupp].splice(dragIdx, 1);
+    db.BRANDS[activeSupp].splice(toIdx, 0, moved);
+    dragIdx = null;
+    renderEditor(activeSupp);
+    markUnsaved(true);
+  });
+  tbody.addEventListener('dragend', () => {
+    tbody.querySelectorAll('tr').forEach(r => r.classList.remove('row-drag-over'));
+    dragIdx = null;
+  });
+}
+
+function syncActiveEditor() {
+  if (!activeSupp) return;
+  const tbody = document.getElementById('brands-tbody');
+  if (!tbody) return;
+  tbody.querySelectorAll('input[data-field]').forEach(input => {
+    const idx = parseInt(input.dataset.idx);
+    const field = input.dataset.field;
+    if (db.BRANDS[activeSupp] && db.BRANDS[activeSupp][idx]) {
+      db.BRANDS[activeSupp][idx][field] = input.value;
+    }
+  });
+}
+
+function changeCategory(val) {
+  db.CATEGORIES[activeSupp] = val;
+  renderSidebar();
+  markUnsaved(true);
+}
+
+// ─────────────────────────────────────────────
+//  ADD SUPPLEMENT MODAL
+// ─────────────────────────────────────────────
+function showAddModal() {
+  document.getElementById('new-name').value = '';
+  document.getElementById('add-modal').classList.add('show');
+  setTimeout(() => document.getElementById('new-name').focus(), 80);
+}
+function closeAddModal() { document.getElementById('add-modal').classList.remove('show'); }
+function confirmAddSupp() {
+  const name = document.getElementById('new-name').value.trim();
+  const cat = document.getElementById('new-cat').value;
+  if (!name) { document.getElementById('new-name').focus(); return; }
+  if (db.BRANDS[name]) { alert('Already exists.'); return; }
+  db.BRANDS[name] = [];
+  db.CATEGORIES[name] = cat;
+  closeAddModal();
+  renderSidebar();
+  selectSupp(name);
+  markUnsaved(true);
+}
+document.getElementById('add-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeAddModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAddModal(); });
+document.getElementById('new-name').addEventListener('keydown', e => { if (e.key === 'Enter') confirmAddSupp(); });
+
+// ─────────────────────────────────────────────
+//  UTILS
+// ─────────────────────────────────────────────
+function markUnsaved(val) {
+  unsaved = val;
+  document.getElementById('unsaved-chip').classList.toggle('show', val);
+}
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+let toastTimer;
+function showToast(msg) {
+  let t = document.getElementById('toast');
+  if (!t) { t = document.createElement('div'); t.id = 'toast'; t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#10b981;color:#fff;padding:11px 20px;border-radius:50px;font-size:13px;font-weight:600;z-index:999;transition:opacity 0.3s;pointer-events:none;'; document.body.appendChild(t); }
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 2500);
+}
+window.addEventListener('beforeunload', e => { if (unsaved) { e.preventDefault(); e.returnValue = ''; } });
+</script>
+</body>
+</html>
