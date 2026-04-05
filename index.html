@@ -316,13 +316,19 @@
   /* Supplement cards — 2-column grid */
   .phase-section { margin-bottom: 56px; scroll-margin-top: 100px; }
   .phase-section-header {
-    display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
-    padding-bottom: 14px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+    padding: 16px 20px; border-radius: 12px;
+    background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(59,130,246,0.08));
+    border: 1px solid rgba(124,58,237,0.25);
   }
-  .phase-section-header h3 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
-  .phase-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0;
+  .phase-section-header h3 {
+    font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
     background: linear-gradient(135deg, var(--accent1), var(--accent2));
-    box-shadow: 0 0 8px rgba(124,58,237,0.6);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .phase-dot { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    box-shadow: 0 0 10px rgba(124,58,237,0.7);
   }
   .phase-count { font-size: 12px; color: var(--text2); margin-left: auto; }
 
@@ -819,11 +825,17 @@
 
     <!-- One-pager CTA -->
     <div style="text-align:center;padding:48px 0 16px;">
-      <button class="btn btn-primary" style="font-size:16px;padding:16px 36px;" onclick="openOnePager()">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        View My Full Plan — One Page
-      </button>
-      <p style="font-size:13px;color:var(--text2);margin-top:12px;">Clean summary you can save or print</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn btn-primary" style="font-size:16px;padding:16px 36px;" onclick="openOnePager()">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          View My Full Plan
+        </button>
+        <button class="btn btn-ghost" style="font-size:16px;padding:16px 28px;" onclick="sharePlan()">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+          Share
+        </button>
+      </div>
+      <p style="font-size:13px;color:var(--text2);margin-top:12px;">Clean summary you can save, print, or share</p>
     </div>
   </div>
   <footer>
@@ -859,7 +871,7 @@
   }
 </style>
 
-<script src="database.js"></script>
+<script src="logic.js"></script>
 <script>
 // ──────────────────────────────────────────────
 //  STATE
@@ -1473,6 +1485,22 @@ function openOnePager() {
 function closeOnePager() {
   document.getElementById('one-pager-overlay').style.display = 'none';
   document.body.style.overflow = '';
+}
+
+function sharePlan() {
+  const title = 'My Supplement Plan — SupplAI';
+  const text = 'Check out my personalized supplement plan from SupplAI!';
+  const url = window.location.href;
+  if (navigator.share) {
+    navigator.share({ title, text, url }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.querySelector('[onclick="sharePlan()"]');
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Link Copied!';
+      setTimeout(() => { btn.innerHTML = orig; }, 2000);
+    });
+  }
 }
 
 // Close on backdrop click
