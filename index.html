@@ -1223,14 +1223,18 @@ function runLoadingAnimation() {
     if (i >= steps.length) {
       clearInterval(interval);
       setTimeout(() => {
-        // Build and show results
-        state.plan = buildPlan(state);
-        state.activePhase = 'pre';
-        state.animatedPhases.clear();
-        renderResults();
-        showSection('results');
-        // Reset loading steps for next time
-        steps.forEach(s => { s.classList.remove('done'); s.querySelector('.check').textContent = s.dataset.n || ''; });
+        try {
+          state.plan = buildPlan(state);
+          state.activePhase = 'pre';
+          state.animatedPhases.clear();
+          renderResults();
+          showSection('results');
+          steps.forEach(s => { s.classList.remove('done'); s.querySelector('.check').textContent = s.dataset.n || ''; });
+        } catch (err) {
+          console.error('Plan generation error:', err);
+          document.getElementById('loading-msg').textContent = 'Something went wrong. Please go back and try again.';
+          document.getElementById('loading-msg').style.color = '#f87171';
+        }
       }, 400);
     }
   }, 420);
