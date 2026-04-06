@@ -136,6 +136,16 @@
   .modal-footer { display:flex; gap:10px; justify-content:flex-end; margin-top:22px; }
 
   ::-webkit-scrollbar { width:5px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:99px; }
+
+  /* ── IMAGE PREVIEW ── */
+  .img-preview-cell { width:70px; text-align:center; }
+  .img-preview { width:56px; height:56px; border-radius:8px; object-fit:contain; background:#f8f8f8; border:1px solid rgba(255,255,255,0.08); display:block; margin:0 auto; }
+  .img-placeholder { width:56px; height:56px; border-radius:8px; background:var(--card2); border:1px solid var(--border2); display:flex; align-items:center; justify-content:center; margin:0 auto; font-size:9px; color:var(--text2); text-align:center; line-height:1.3; padding:4px; }
+  .img-col-header { display:flex; align-items:center; gap:5px; }
+  .img-info-icon { width:14px; height:14px; border-radius:50%; background:var(--border2); color:var(--text2); font-size:9px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; cursor:help; flex-shrink:0; }
+  .img-tip { display:none; position:absolute; z-index:50; background:var(--card); border:1px solid var(--border2); border-radius:10px; padding:12px 14px; width:260px; font-size:12px; color:var(--text2); line-height:1.6; box-shadow:0 8px 24px rgba(0,0,0,0.4); }
+  .img-info-wrap { position:relative; display:inline-flex; align-items:center; }
+  .img-info-wrap:hover .img-tip { display:block; top:20px; left:0; }
 </style>
 </head>
 <body>
@@ -252,6 +262,21 @@ const CAT_COLORS = {
   PROTEIN:'#a78bfa', HEALTH:'#2dd4bf', HORMONE:'#c084fc', SUPPLEMENT:'#94a3b8'
 };
 const ALL_CATS = Object.keys(CAT_COLORS);
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function getAmazonImage(url) {
+  if (!url || url === '#') return null;
+  const m = url.match(/\/dp\/([A-Z0-9]{10})/);
+  return m ? 'https://images-na.ssl-images-amazon.com/images/P/' + m[1] + '.01._SL250_.jpg' : null;
+}
+
+function imgPreviewHtml(url, idx) {
+  const src = getAmazonImage(url);
+  if (src) return `<img class="img-preview" id="img-prev-${idx}" src="${src}" onerror="this.style.display='none';document.getElementById('img-ph-${idx}').style.display='flex';" alt="">
+    <div class="img-placeholder" id="img-ph-${idx}" style="display:none;">No image</div>`;
+  return `<div class="img-placeholder" id="img-ph-${idx}"><img class="img-preview" id="img-prev-${idx}" style="display:none;" alt=""></div>`;
+}
 
 // ─────────────────────────────────────────────
 //  DEFAULT DATA
@@ -631,6 +656,7 @@ function renderEditor(supp) {
       <td><input class="cell-input" data-field="tagline" data-idx="${i}" value="${esc(b.tagline)}" placeholder="Short tagline"></td>
       <td><input class="cell-input" data-field="abbr" data-idx="${i}" value="${esc(b.abbr)}" placeholder="ON" style="max-width:70px;"></td>
       <td><input class="cell-input url-input" data-field="url" data-idx="${i}" value="${esc(b.url||'#')}" placeholder="https://..."></td>
+      <td class="img-preview-cell">${imgPreviewHtml(b.url, i)}</td>
       <td><button class="btn btn-danger" style="padding:4px 10px;font-size:11px;" data-remove="${i}">✕</button></td>
     </tr>`).join('');
 
@@ -667,6 +693,21 @@ function renderEditor(supp) {
             <th>Tagline</th>
             <th style="width:80px;">Abbr</th>
             <th style="width:25%;">Affiliate URL</th>
+            <th style="width:70px;">
+              <div class="img-col-header">
+                Image
+                <div class="img-info-wrap">
+                  <span class="img-info-icon">?</span>
+                  <div class="img-tip">
+                    <strong style="color:var(--text);display:block;margin-bottom:6px;">Why is my image blank?</strong>
+                    Images are pulled automatically from Amazon product URLs.<br><br>
+                    <strong style="color:var(--text);">✓ Use:</strong> <code style="background:var(--card2);padding:1px 5px;border-radius:3px;font-size:11px;">amazon.com/dp/ASIN</code><br>
+                    <strong style="color:#f87171;">✗ Avoid:</strong> search result or sponsored URLs (those with <code style="background:var(--card2);padding:1px 5px;border-radius:3px;font-size:11px;">ref=sr_</code> or <code style="background:var(--card2);padding:1px 5px;border-radius:3px;font-size:11px;">sbo=</code>).<br><br>
+                    Non-Amazon products (<code style="background:var(--card2);padding:1px 5px;border-radius:3px;font-size:11px;">url: #</code>) will show no image.
+                  </div>
+                </div>
+              </div>
+            </th>
             <th style="width:44px;"></th>
           </tr>
         </thead>
@@ -678,7 +719,23 @@ function renderEditor(supp) {
     </div>`;
 
   // Attach all events via delegation — no inline onclick in dynamic HTML
-  editorEl.querySelector('#brands-tbody').addEventListener('input', () => markUnsaved(true));
+  editorEl.querySelector('#brands-tbody').addEventListener('input', e => {
+    markUnsaved(true);
+    // Live image preview update when URL field changes
+    if (e.target.dataset.field === 'url') {
+      const idx = e.target.dataset.idx;
+      const imgSrc = getAmazonImage(e.target.value);
+      const imgEl = document.getElementById('img-prev-' + idx);
+      const phEl = document.getElementById('img-ph-' + idx);
+      if (imgSrc) {
+        if (imgEl) { imgEl.src = imgSrc; imgEl.style.display = 'block'; }
+        if (phEl) phEl.style.display = 'none';
+      } else {
+        if (imgEl) imgEl.style.display = 'none';
+        if (phEl) { phEl.style.display = 'flex'; phEl.textContent = 'No image'; }
+      }
+    }
+  });
 
   editorEl.querySelector('#add-brand-btn').addEventListener('click', () => {
     syncActiveEditor();
@@ -789,9 +846,6 @@ document.getElementById('new-name').addEventListener('keydown', e => { if (e.key
 function markUnsaved(val) {
   unsaved = val;
   document.getElementById('unsaved-chip').classList.toggle('show', val);
-}
-function esc(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 let toastTimer;
 function showToast(msg) {
