@@ -1335,7 +1335,7 @@ function buildSuppCard(s, idx, phase) {
 
     <div class="supp-goal-bar">
       <div class="bar-label">
-        <span class="bar-label-text">Goal Impact</span>
+        <span class="bar-label-text">IMPACT ON YOUR GOAL</span>
         <span class="bar-score">${s.score}/100</span>
       </div>
       <div class="bar-track">
@@ -1492,16 +1492,27 @@ function closeOnePager() {
 }
 
 function sharePlan() {
-  const title = 'My Supplement Plan — SupplAI';
-  const text = 'Check out my personalized supplement plan from SupplAI!';
-  const url = window.location.href;
+  const phaseLabels = { pre: 'PRE-WORKOUT', during: 'DURING WORKOUT', post: 'POST-WORKOUT' };
+  const lines = ['\uD83C\uDFCB\uFE0F My Supplement Plan (via SupplAI)', ''];
+  ['pre', 'during', 'post'].forEach(phase => {
+    const supps = state.plan[phase] || [];
+    if (!supps.length) return;
+    lines.push(phaseLabels[phase]);
+    supps.forEach(s => {
+      const d = getDoseData(s.name, state);
+      lines.push('\u2022 ' + s.name + ' \u2014 ' + d.dose + ' | ' + d.when);
+    });
+    lines.push('');
+  });
+  lines.push('Generate your free plan at ' + window.location.href);
+  const text = lines.join('\n');
+  const btn = document.querySelector('[onclick="sharePlan()"]');
   if (navigator.share) {
-    navigator.share({ title, text, url }).catch(() => {});
+    navigator.share({ title: 'My Supplement Plan \u2014 SupplAI', text }).catch(() => {});
   } else {
-    navigator.clipboard.writeText(url).then(() => {
-      const btn = document.querySelector('[onclick="sharePlan()"]');
+    navigator.clipboard.writeText(text).then(() => {
       const orig = btn.innerHTML;
-      btn.innerHTML = '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Link Copied!';
+      btn.innerHTML = '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Copied!';
       setTimeout(() => { btn.innerHTML = orig; }, 2000);
     });
   }
