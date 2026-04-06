@@ -1232,7 +1232,7 @@ function runLoadingAnimation() {
           steps.forEach(s => { s.classList.remove('done'); s.querySelector('.check').textContent = s.dataset.n || ''; });
         } catch (err) {
           console.error('Plan generation error:', err);
-          document.getElementById('loading-msg').textContent = 'Something went wrong. Please go back and try again.';
+          document.getElementById('loading-msg').innerHTML = 'Error: ' + err.message + '<br><small style="opacity:0.7;">' + (err.stack || '').split('\n')[1] + '</small>';
           document.getElementById('loading-msg').style.color = '#f87171';
         }
       }, 400);
