@@ -393,6 +393,11 @@
     background: linear-gradient(135deg, var(--accent1), var(--accent2));
     display: flex; align-items: center; justify-content: center;
     font-size: 16px; font-weight: 800; color: #fff; letter-spacing: 1px;
+    overflow: hidden;
+  }
+  .brand-img img {
+    width: 130px; height: 110px; object-fit: contain;
+    background: #fff; border-radius: 12px;
   }
   .brand-tagline { font-size: 11px; color: var(--text2); max-width: 130px; line-height: 1.4; }
   .buy-btn {
@@ -871,7 +876,7 @@
   }
 </style>
 
-<script src="logic.js"></script>
+<script src="database.js"></script>
 <script>
 // ──────────────────────────────────────────────
 //  STATE
@@ -1364,10 +1369,20 @@ function buildSuppCard(s, idx, phase) {
   </div>`;
 }
 
+function getAmazonImage(url) {
+  if (!url || url === '#') return null;
+  const m = url.match(/\/dp\/([A-Z0-9]{10})/);
+  return m ? 'https://images-na.ssl-images-amazon.com/images/P/' + m[1] + '.01._SL250_.jpg' : null;
+}
+
 function renderBrandSlide(brand) {
+  const imgUrl = getAmazonImage(brand.url);
+  const imgHtml = imgUrl
+    ? `<img src="${imgUrl}" alt="${brand.name}" onerror="this.parentElement.textContent='${brand.abbr || brand.name.slice(0,3).toUpperCase()}';">`
+    : (brand.abbr || '');
   return `
     <div class="brand-name-top">${brand.name}</div>
-    <div class="brand-img">${brand.abbr}</div>
+    <div class="brand-img">${imgHtml}</div>
     <div class="brand-tagline">${brand.tagline}</div>
     <a href="#" class="buy-btn" onclick="return false;">BUY THIS PRODUCT</a>`;
 }

@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════════════════════════
 //  SUPPL AI — DATABASE
 //  Edit this file to add/update supplements, brands, scores & copy.
-//  Last exported: 26/03/2026 22:20:05
+//  Last exported: 29/03/2026 01:32:03
 // ══════════════════════════════════════════════════════════════════
 
 // ──────────────────────────────────────────────
@@ -29,11 +29,9 @@ const CATEGORIES = {
 // ──────────────────────────────────────────────
 const BRANDS = {
   "Whey Protein": [
-    { name: "Optimum Nutrition", tagline: "Gold Standard quality since 1986", abbr: "ON", url: "#" },
-    { name: "Myprotein", tagline: "Europe's #1 sports nutrition brand", abbr: "MP", url: "#" },
-    { name: "Dymatize", tagline: "Precision nutrition for elite athletes", abbr: "DY", url: "#" },
-    { name: "BSS", tagline: "Finish First — always", abbr: "BSN", url: "#" },
-    { name: "Liburdose", tagline: "Precision nutrition for elite athletes", abbr: "DYI", url: "www.google.com" }
+    { name: "Six Star Whey Protein Powder", tagline: "Triple Chocolate", abbr: "ON", url: "https://www.amazon.com/Six-Star-Protein-Triple-Chocolate/dp/B09SYB2ZQ2/ref=sr_1_8?crid=1F8SHEAHJNHN6&dib=eyJ2IjoiMSJ9.ccdSyil4QFC6zNQ9Mmaa3hdg0-HJ16DM7JaBHohRej4Hvbza6PTiEtFTZFk9O0UPpNlFeSec2FJ3w_EdPLTnX3NVV5zehoEFAELsiWp2sOWJAR8PFi604TYXZsCeINLiiCBtymnAedIQfTbYApVAw8nOzoiz569nJM6d5dZcCKIziQABYKrUMzyOwR1z5TkXgZQhEn08kUjiodulHjsIBA0-74HqCMCkgi4LelgfolJyAB9XlWQasA6rzjmIsvlJN6h5iIio__yxrvwedEdOFBhUJPT1e4e-asqeSOB38YM.DonlHZU2ubkZ06-v8l8u1Or13AF4DIWZMol7LVpQ4k8&dib_tag=se&keywords=whey%2Bprotein&qid=1774765742&rdc=1&sprefix=whey%2Bprotein%2Caps%2C185&sr=8-8&th=1" },
+    { name: "C4 Whey Protein Powder", tagline: "Peanut Butter & Chocolate", abbr: "MP", url: "https://www.amazon.com/Cellucor-Protein-Powder-Reeses-Chocolate/dp/B0DJB9VYF3/ref=sr_1_7?crid=1F8SHEAHJNHN6&dib=eyJ2IjoiMSJ9.ccdSyil4QFC6zNQ9Mmaa3hdg0-HJ16DM7JaBHohRej4Hvbza6PTiEtFTZFk9O0UPpNlFeSec2FJ3w_EdPLTnX3NVV5zehoEFAELsiWp2sOWJAR8PFi604TYXZsCeINLiiCBtymnAedIQfTbYApVAw8nOzoiz569nJM6d5dZcCKIziQABYKrUMzyOwR1z5TkXgZQhEn08kUjiodulHjsIBA0-74HqCMCkgi4LelgfolJyAB9XlWQasA6rzjmIsvlJN6h5iIio__yxrvwedEdOFBhUJPT1e4e-asqeSOB38YM.DonlHZU2ubkZ06-v8l8u1Or13AF4DIWZMol7LVpQ4k8&dib_tag=se&keywords=whey%2Bprotein&qid=1774765742&sprefix=whey%2Bprotein%2Caps%2C185&sr=8-7&th=1" },
+    { name: "Momentous Essential Grass-Fed Whey Protein Powder", tagline: "Chocolate", abbr: "DY", url: "https://www.amazon.com/Momentous-Essential-Grass-Fed-Protein-Powder/dp/B09F21D98X/ref=sxin_15_pa_sp_search_thematic_sspa?content-id=amzn1.sym.17106a56-58e7-409a-96ee-b2be7987a708%3Aamzn1.sym.17106a56-58e7-409a-96ee-b2be7987a708&crid=1F8SHEAHJNHN6&cv_ct_cx=whey%2Bprotein&keywords=whey%2Bprotein&pd_rd_i=B09F21D98X&pd_rd_r=6a508f17-2d6b-4c5f-bc70-92a01f9c45ca&pd_rd_w=9NDKD&pd_rd_wg=ZfA06&pf_rd_p=17106a56-58e7-409a-96ee-b2be7987a708&pf_rd_r=X6XTT7F5ZCTQ9AXDPSM5&qid=1774765742&rdc=1&sbo=RZvfv%2F%2FHxDF%2BO5021pAnSA%3D%3D&sprefix=whey%2Bprotein%2Caps%2C185&sr=1-1-543a432c-671c-4a3a-a15e-c8d9b2229043-spons&aref=SPrJHsBMDD&sp_csd=d2lkZ2V0TmFtZT1zcF9zZWFyY2hfdGhlbWF0aWM&th=1" }
   ],
   "Plant Protein": [
     { name: "Garden of Life", tagline: "Certified organic, whole-food protein", abbr: "GOL", url: "#" },
