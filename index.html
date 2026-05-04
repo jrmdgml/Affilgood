@@ -1408,7 +1408,7 @@ function getAmazonImage(url) {
 }
 
 function renderBrandSlide(brand, suppName = '') {
-  const imgUrl = getAmazonImage(brand.url);
+  const imgUrl = brand.img || getAmazonImage(brand.url);
   const imgHtml = imgUrl
     ? `<img src="${imgUrl}" alt="${brand.name}" referrerpolicy="no-referrer" onerror="this.parentElement.textContent='${brand.abbr || brand.name.slice(0,3).toUpperCase()}';">`
     : (brand.abbr || '');

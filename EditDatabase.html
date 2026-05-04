@@ -269,9 +269,9 @@ function getAmazonImage(url) {
   return m ? 'https://images-na.ssl-images-amazon.com/images/P/' + m[1] + '.01._SL250_.jpg' : null;
 }
 
-function imgPreviewHtml(url, idx) {
-  const src = getAmazonImage(url);
-  if (src) return `<img class="img-preview" id="img-prev-${idx}" src="${src}" onerror="this.style.display='none';document.getElementById('img-ph-${idx}').style.display='flex';" alt="">
+function imgPreviewHtml(imgField, url, idx) {
+  const src = imgField || getAmazonImage(url);
+  if (src) return `<img class="img-preview" id="img-prev-${idx}" src="${src}" referrerpolicy="no-referrer" onerror="this.style.display='none';document.getElementById('img-ph-${idx}').style.display='flex';" alt="">
     <div class="img-placeholder" id="img-ph-${idx}" style="display:none;">No image</div>`;
   return `<div class="img-placeholder" id="img-ph-${idx}"><img class="img-preview" id="img-prev-${idx}" style="display:none;" alt=""></div>`;
 }
@@ -477,9 +477,12 @@ async function exportFile() {
     .replace(/}$/, '};');
 
   const brandsEntries = Object.entries(db.BRANDS).map(([supp, brands]) => {
-    const rows = brands.map(b =>
-      `    { name: ${JSON.stringify(b.name)}, tagline: ${JSON.stringify(b.tagline)}, abbr: ${JSON.stringify(b.abbr)}, url: ${JSON.stringify(b.url || '#')} }`
-    ).join(',\n');
+    const rows = brands.map(b => {
+      let entry = `    { name: ${JSON.stringify(b.name)}, tagline: ${JSON.stringify(b.tagline)}, abbr: ${JSON.stringify(b.abbr)}, url: ${JSON.stringify(b.url || '#')}`;
+      if (b.img) entry += `, img: ${JSON.stringify(b.img)}`;
+      entry += ` }`;
+      return entry;
+    }).join(',\n');
     return `  ${JSON.stringify(supp)}: [\n${rows}\n  ]`;
   }).join(',\n');
   const brandsStr = `const BRANDS = {\n${brandsEntries}\n};`;
@@ -692,7 +695,8 @@ function renderEditor(supp) {
       <td><input class="cell-input" data-field="tagline" data-idx="${i}" value="${esc(b.tagline)}" placeholder="Short tagline"></td>
       <td><input class="cell-input" data-field="abbr" data-idx="${i}" value="${esc(b.abbr)}" placeholder="ON" style="max-width:70px;"></td>
       <td><input class="cell-input url-input" data-field="url" data-idx="${i}" value="${esc(b.url||'#')}" placeholder="https://..."></td>
-      <td class="img-preview-cell">${imgPreviewHtml(b.url, i)}</td>
+      <td><input class="cell-input url-input" data-field="img" data-idx="${i}" value="${esc(b.img||'')}" placeholder="Paste image URL"></td>
+      <td class="img-preview-cell">${imgPreviewHtml(b.img, b.url, i)}</td>
       <td><button class="btn btn-danger" style="padding:4px 10px;font-size:11px;" data-remove="${i}">✕</button></td>
     </tr>`).join('');
 
@@ -728,8 +732,9 @@ function renderEditor(supp) {
             <th style="width:21%;">Brand Name</th>
             <th>Tagline</th>
             <th style="width:80px;">Abbr</th>
-            <th style="width:25%;">Affiliate URL</th>
-            <th style="width:70px;">
+            <th style="width:22%;">Affiliate URL</th>
+            <th style="width:22%;">Image URL <span style="font-size:10px;color:var(--text2);font-weight:400;">(right-click product image on Amazon → Copy image address)</span></th>
+            <th style="width:60px;">
               <div class="img-col-header">
                 Image
                 <div class="img-info-wrap">
@@ -757,10 +762,14 @@ function renderEditor(supp) {
   // Attach all events via delegation — no inline onclick in dynamic HTML
   editorEl.querySelector('#brands-tbody').addEventListener('input', e => {
     markUnsaved(true);
-    // Live image preview update when URL field changes
-    if (e.target.dataset.field === 'url') {
+    // Live image preview update when img or url field changes
+    if (e.target.dataset.field === 'img' || e.target.dataset.field === 'url') {
       const idx = e.target.dataset.idx;
-      const imgSrc = getAmazonImage(e.target.value);
+      const brands = db.BRANDS[activeSupp] || [];
+      const b = brands[idx] || {};
+      const imgFieldVal = e.target.dataset.field === 'img' ? e.target.value : (b.img || '');
+      const urlVal = e.target.dataset.field === 'url' ? e.target.value : (b.url || '');
+      const imgSrc = imgFieldVal || getAmazonImage(urlVal);
       const imgEl = document.getElementById('img-prev-' + idx);
       const phEl = document.getElementById('img-ph-' + idx);
       if (imgSrc) {
@@ -775,7 +784,7 @@ function renderEditor(supp) {
 
   editorEl.querySelector('#add-brand-btn').addEventListener('click', () => {
     syncActiveEditor();
-    db.BRANDS[activeSupp].push({ name: '', tagline: '', abbr: '', url: '#' });
+    db.BRANDS[activeSupp].push({ name: '', tagline: '', abbr: '', url: '#', img: '' });
     renderEditor(activeSupp);
     markUnsaved(true);
     const inputs = document.querySelectorAll('#brands-tbody input[data-field="name"]');
