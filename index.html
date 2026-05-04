@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SupplAI — Your Personalized Supplement Plan</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script>
+  !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(a!==void 0?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+" (stub)"},o="init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureFlagEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey identify alias setPersonProperties groupIdentify setPersonPropertiesForFlags resetGroupPropertiesForFlags setGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||(window.posthog={}));
+  posthog.init('phc_rxBiy2K3d5U4AG4oaexh2pwaDuzmjMdQwb79YjaZrcPq', {
+    api_host: 'https://us.i.posthog.com',
+    person_profiles: 'always'
+  });
+</script>
 <style>
   :root {
     --bg: #0a0a0f;
@@ -907,6 +914,7 @@ function showSection(id) {
 }
 
 function startQuestionnaire() {
+  posthog.capture('questionnaire_started');
   showSection('questionnaire');
   goToStep(1);
 }
@@ -948,6 +956,7 @@ function nextStep(step) {
       document.getElementById('goals-error').classList.add('show'); return;
     }
     document.getElementById('goals-error').classList.remove('show');
+    posthog.capture('questionnaire_step_completed', { step: 1, goals: state.goals });
     goToStep(2);
 
   } else if (step === 2) {
@@ -957,6 +966,7 @@ function nextStep(step) {
       document.getElementById('profile-error').classList.add('show'); return;
     }
     document.getElementById('profile-error').classList.remove('show');
+    posthog.capture('questionnaire_step_completed', { step: 2 });
     state.age = age;
     state.sex = sex;
     // weight
@@ -983,6 +993,7 @@ function nextStep(step) {
       document.getElementById('training-error').classList.add('show'); return;
     }
     document.getElementById('training-error').classList.remove('show');
+    posthog.capture('questionnaire_step_completed', { step: 3, training_style: state.trainingStyle, training_times: state.trainingTimes });
     state.fitnessLevel = level; state.sessionsPerWeek = sessions;
     state.duration = duration;
     // Derive single trainingTime for backward compat (pick first non-"No Preference", or null)
@@ -996,6 +1007,7 @@ function nextStep(step) {
       document.getElementById('budget-error').classList.add('show'); return;
     }
     document.getElementById('budget-error').classList.remove('show');
+    posthog.capture('questionnaire_step_completed', { step: 4, budget: state.budget });
     goToStep(5);
   }
 }
@@ -1205,6 +1217,8 @@ function generatePlan() {
   }
   document.getElementById('email-error').classList.remove('show');
   state.email = email;
+  posthog.identify(email, { email });
+  posthog.capture('questionnaire_step_completed', { step: 5 });
   showSection('loading');
   runLoadingAnimation();
 }
@@ -1237,6 +1251,20 @@ function runLoadingAnimation() {
           state.animatedPhases.clear();
           renderResults();
           showSection('results');
+          posthog.capture('plan_generated', {
+            goals: state.goals,
+            budget: state.budget,
+            fitness_level: state.fitnessLevel,
+            sessions_per_week: state.sessionsPerWeek,
+            duration: state.duration,
+            training_style: state.trainingStyle,
+            training_times: state.trainingTimes,
+            sex: state.sex,
+            supplements_pre: (state.plan.pre || []).map(s => s.name),
+            supplements_during: (state.plan.during || []).map(s => s.name),
+            supplements_post: (state.plan.post || []).map(s => s.name),
+            total_supplements: (state.plan.pre || []).length + (state.plan.during || []).length + (state.plan.post || []).length
+          });
           steps.forEach(s => { s.classList.remove('done'); s.querySelector('.check').textContent = s.dataset.n || ''; });
         } catch (err) {
           console.error('Plan generation error:', err);
@@ -1306,6 +1334,7 @@ function renderResults() {
 }
 
 function switchPhase(phase) {
+  posthog.capture('phase_tab_clicked', { phase });
   document.querySelectorAll('.phase-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.phase === phase);
   });
@@ -1364,7 +1393,7 @@ function buildSuppCard(s, idx, phase) {
       <div class="carousel-inner">
         <button class="carousel-btn" onclick="carouselPrev('${phase}',${idx},${brands.length})">&#8592;</button>
         <div class="brand-display" id="brand-display-${phase}-${idx}">
-          ${renderBrandSlide(brands[0])}
+          ${renderBrandSlide(brands[0], s.name)}
         </div>
         <button class="carousel-btn carousel-btn-next" onclick="carouselNext('${phase}',${idx},${brands.length})">&#8594;</button>
       </div>
@@ -1378,7 +1407,7 @@ function getAmazonImage(url) {
   return m ? 'https://images-na.ssl-images-amazon.com/images/P/' + m[1] + '.01._SL250_.jpg' : null;
 }
 
-function renderBrandSlide(brand) {
+function renderBrandSlide(brand, suppName = '') {
   const imgUrl = getAmazonImage(brand.url);
   const imgHtml = imgUrl
     ? `<img src="${imgUrl}" alt="${brand.name}" onerror="this.parentElement.textContent='${brand.abbr || brand.name.slice(0,3).toUpperCase()}';">`
@@ -1387,7 +1416,7 @@ function renderBrandSlide(brand) {
     <div class="brand-name-top">${brand.name}</div>
     <div class="brand-img">${imgHtml}</div>
     <div class="brand-tagline">${brand.tagline}</div>
-    <a href="#" class="buy-btn" onclick="return false;">BUY THIS PRODUCT</a>`;
+    <a href="${brand.url && brand.url !== '#' ? brand.url : '#'}" class="buy-btn" target="${brand.url && brand.url !== '#' ? '_blank' : ''}" rel="noopener noreferrer" onclick="posthog.capture('affiliate_link_clicked', { supplement: '${suppName}', brand: '${brand.name.replace(/'/g, "\\'")}', url: '${brand.url}' }); ${!brand.url || brand.url === '#' ? 'return false;' : ''}">BUY THIS PRODUCT</a>`;
 }
 
 function carouselNext(phase, idx, total) {
@@ -1414,7 +1443,7 @@ function updateCarousel(phase, idx) {
     el.style.transform = 'translateX(8px)';
     el.style.transition = 'opacity 0.18s, transform 0.18s';
     setTimeout(() => {
-      el.innerHTML = renderBrandSlide(brands[i]);
+      el.innerHTML = renderBrandSlide(brands[i], supp.name);
       el.style.opacity = '1';
       el.style.transform = 'translateX(0)';
     }, 180);
@@ -1425,6 +1454,7 @@ function updateCarousel(phase, idx) {
 //  ONE-PAGER
 // ──────────────────────────────────────────────
 function openOnePager() {
+  posthog.capture('one_pager_opened');
   const phaseLabels = { pre: 'Pre-Workout', during: 'During Workout', post: 'Post-Workout' };
   const phaseColors = { pre: '#7c3aed', during: '#2563eb', post: '#059669' };
 
@@ -1510,6 +1540,7 @@ function closeOnePager() {
 }
 
 function sharePlan() {
+  posthog.capture('plan_shared');
   const phaseLabels = { pre: 'PRE-WORKOUT', during: 'DURING WORKOUT', post: 'POST-WORKOUT' };
   const lines = ['\uD83C\uDFCB\uFE0F My Supplement Plan (via SupplAI)', ''];
   ['pre', 'during', 'post'].forEach(phase => {
